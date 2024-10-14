@@ -9,6 +9,8 @@ Controller PlayerController => utilize OnCollisionEnter func
 => divide keyinputs callback func OnKeyBoard to OnKeyBoardMove, Jump
 => analyze ground check and edit _at at collision, not always update
 
+change gravity edit>project settings>physics>gravity -9.81 to -15
+
 Define script
 24/10/14 3pm done
 implementing jump, improve movement
