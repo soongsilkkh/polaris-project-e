@@ -42,9 +42,27 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     float _speed = 4.0f;
 
+
+    public enum PlayerVerticalMovement
+    {
+        Idle, Forward, Back
+    }
+    public enum PlayerHorizontalMovement
+    {
+        Idle, Left, Right
+    }
+    public PlayerVerticalMovement PlayerVertMove = PlayerVerticalMovement.Idle;
+    public PlayerHorizontalMovement PlayerHorizonMove = PlayerHorizontalMovement.Idle;
+
+
+    [SerializeField]
+    Camera _camera = null;
+    CameraController _cameraController = null;
+
     private void Start()
     {
         _rb=GetComponent<Rigidbody>();
+        _cameraController=_camera.GetComponent<CameraController>();
 
         Managers.Input.KeyAction -= this.OnKeyBoardJump;
         Managers.Input.KeyAction += this.OnKeyBoardJump;
@@ -72,6 +90,8 @@ public class PlayerController : MonoBehaviour
     }
 
 
+    //test
+
     //맵 시작과 끝 트리거
     private void OnTriggerEnter(Collider other)
     {
@@ -79,50 +99,85 @@ public class PlayerController : MonoBehaviour
         if (other.gameObject.name == "StartTrigger")
             //원래는 전 맵(장소)의 EndTrigger에서 받아야함.
         {
+
+            _cameraController._cameraMode = Define.CameraMode.VerticalQuaterView;
+
             //현재 맵 정보 받기
-            
+            _cameraController.StoreMapInfo(8, 30, other.transform.position.x, transform.position.x + 30);
+
+
+
         }
         else if(other.gameObject.name == "EndTrigger")
         {
-
+            Debug.Log("store next map info");
         }
     }
 
+    private void OnTriggerExit(Collider other)
+    {
+
+        _cameraController._cameraMode = Define.CameraMode.VerticalHumanView;
+    }
+
+    
+    
 
     void OnKeyBoardMove()
     {
         
         if (Input.GetKey(KeyCode.W))
         {
-            PlayerAbsoluteRotate(Vector3.forward);
+            if (PlayerVertMove != PlayerVerticalMovement.Back)
+            {
+                PlayerVertMove = PlayerVerticalMovement.Forward;
 
-            PlayerAbsoluteMove(Vector3.forward, _speed);
+                PlayerAbsoluteRotate(Vector3.forward);
 
-            StatePlayer = PlayerState.Moving;
+                PlayerAbsoluteMove(Vector3.forward, _speed);
+
+                StatePlayer = PlayerState.Moving;
+            }
         }
         if (Input.GetKey(KeyCode.S))
         {
-            PlayerAbsoluteRotate(Vector3.back);
-            
-            PlayerAbsoluteMove(Vector3.back, _speed);
+            if (PlayerVertMove != PlayerVerticalMovement.Forward)
+            {
+                PlayerVertMove = PlayerVerticalMovement.Back;
 
-            StatePlayer = PlayerState.Moving;
+                PlayerAbsoluteRotate(Vector3.back);
+
+                PlayerAbsoluteMove(Vector3.back, _speed);
+
+                StatePlayer = PlayerState.Moving;
+            }
         }
+
+
         if (Input.GetKey(KeyCode.A))
         {
-            PlayerAbsoluteRotate(Vector3.left);
+            if (PlayerHorizonMove != PlayerHorizontalMovement.Right)
+            {
+                PlayerHorizonMove = PlayerHorizontalMovement.Left;
+                PlayerAbsoluteRotate(Vector3.left);
 
-            PlayerAbsoluteMove(Vector3.left, _speed);
+                PlayerAbsoluteMove(Vector3.left, _speed);
 
-            StatePlayer = PlayerState.Moving;
+                StatePlayer = PlayerState.Moving;
+            }
         }
         if (Input.GetKey(KeyCode.D))
         {
-            PlayerAbsoluteRotate(Vector3.right);
+            if (PlayerHorizonMove != PlayerHorizontalMovement.Left)
+            {
+                PlayerHorizonMove = PlayerHorizontalMovement.Right;
 
-            PlayerAbsoluteMove(Vector3.right, _speed);
+                PlayerAbsoluteRotate(Vector3.right);
 
-            StatePlayer = PlayerState.Moving;
+                PlayerAbsoluteMove(Vector3.right, _speed);
+
+                StatePlayer = PlayerState.Moving;
+            }
         }
         
     }
@@ -132,6 +187,8 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.D)
             || Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.S))
         {
+            PlayerVertMove = PlayerVerticalMovement.Idle;
+            PlayerHorizonMove = PlayerHorizontalMovement.Idle;
             StatePlayer = PlayerState.Idle;
         }
     }
