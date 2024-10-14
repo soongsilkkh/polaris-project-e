@@ -93,10 +93,6 @@ public class PlayerController : MonoBehaviour
         _at = PlayerAt.OnGround;
     }
 
-    //test
-    //bool _isPlayerOnAir = false;
-    //아마 바닥 게임오브젝트의 레이어를 지정하고
-    //해당 레이어 마스크와 충돌했을 때 바닥이라고 인지시켜야할듯
 
 
     void OnKeyBoardMove()
@@ -147,17 +143,22 @@ public class PlayerController : MonoBehaviour
 
     void OnKeyBoardJump()
     {
+
         if (Input.GetKeyDown(KeyCode.Space))
         {
             if (_at == PlayerAt.OnGround)
             {
+                _at = PlayerAt.OnAir;
                 _rb.AddForce(Vector3.up * _speed, ForceMode.Impulse);
-                
-
-                if(!isPlayerOn())
-                    _at = PlayerAt.OnAir;
             }
         }
+
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            if(isPlayerOn())
+                _at = PlayerAt.OnGround;
+        }
+
     }
 
     void PlayerAbsoluteRotate(Vector3 direct)

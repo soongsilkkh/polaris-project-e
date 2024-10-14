@@ -11,15 +11,10 @@ Controller PlayerController => utilize OnCollisionEnter func
 
 change gravity edit>project settings>physics>gravity -9.81 to -15
 
-bug : if rigidbody.AddForce func called '
-but target go's transform not actually jump(stick on ground)
-( cause of short roof, side friction, etc,,,)
-_at isOnAir but no collision comes, no transform changed
-leads to infinit OnAir with no collision func, isPlayerOn func
-=>
-debug : check actual go's transform jumped
-utilize isPlayerOn func at jump KeyDown (OnKeyBoardJump func)
+bug : double jump, KeyDown(space) can't catch bug
+
+debug : check actual go's position at KeyUp(space) not KeyDown(space)
 
 Define script
-24/10/14 3pm done
-improve jump, improve movement
+24/10/14 1600 done
+improve jump
