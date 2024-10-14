@@ -22,6 +22,15 @@ public class Managers : MonoBehaviour
         _input.OnUpdate();
     }
 
+    //이동 관련해서는 Fixed Update가 낫다더라,,,
+    //대부분의 키가 이동관련이니 적용해봄
+    //사이드 collision시 파다닥 거리는 이슈 해결됨.
+    //동시에 눌리는 부분에 취약하닌 Space(점프)는 Update에서
+    private void FixedUpdate()
+    {
+        _input.OnMoveUpdate();
+    }
+
     static void Init()
     {
         if(s_instance == null)

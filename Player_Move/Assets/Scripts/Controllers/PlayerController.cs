@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class PlayerController : MonoBehaviour
 {
@@ -8,24 +11,85 @@ public class PlayerController : MonoBehaviour
     {
         Idle,
         Moving,
+
+
+
+        Jumping,
+        Dead,
     }
 
+    public enum PlayerAt
+    {
+        OnGround,
+        OnAir,
+
+    }
+
+    
+    public enum PlayerMode
+    {
+        Reality, //현실
+        Virtuality, //현실+가상
+        Puzzle, //미니게임
+
+    }
+    
+    
     PlayerState _state=PlayerState.Idle;
+    PlayerAt _at=PlayerAt.OnGround;
+    Rigidbody _rb =null;
 
     [SerializeField]
-    float _speed = 7.0f;
+    float _speed = 4.0f;
 
     private void Start()
     {
-        Managers.Input.KeyAction -= this.OnKeyBoard;
-        Managers.Input.KeyAction += this.OnKeyBoard;
+        _rb=GetComponent<Rigidbody>();
+
+        Managers.Input.KeyAction -= this.OnKeyBoardJump;
+        Managers.Input.KeyAction += this.OnKeyBoardJump;
+
+        Managers.Input.MoveKeyAction-= this.OnKeyBoardMove;
+        Managers.Input.MoveKeyAction+= this.OnKeyBoardMove;
+
     }
 
     private void Update()
     {
+        //리소스 너무 낭비됨.
+        /*
+        if (isPlayerOn())
+        {
+            _at=PlayerAt.OnGround;
+        }
+        else
+        {
+            _at = PlayerAt.OnAir;
+        }
+        */
+
+        /*
+        if (_at == PlayerAt.OnAir)
+        {
+            if(isPlayerOn())
+                _at=PlayerAt.OnGround;
+        }
+        */
+
         PrintPlayerState();
     }
 
+
+    //충돌 시에만 위치파악 레이캐스팅 동작
+    private void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log($"collision {collision.transform.name}");
+
+
+        //마지막 플레이어 위치 _at이 OnAir일때
+        if(_at==PlayerAt.OnAir&&isPlayerOn())
+        _at = PlayerAt.OnGround;
+    }
 
     //test
     //bool _isPlayerOnAir = false;
@@ -33,77 +97,97 @@ public class PlayerController : MonoBehaviour
     //해당 레이어 마스크와 충돌했을 때 바닥이라고 인지시켜야할듯
 
 
-    void OnKeyBoard()
+    void OnKeyBoardMove()
     {
+
         if (Input.GetKey(KeyCode.W))
         {
-            transform.rotation = Quaternion.Slerp(transform.rotation, 
-                Quaternion.LookRotation(Vector3.forward), 0.2f);
+            PlayerAbsoluteRotate(Vector3.forward);
 
-            transform.position += Vector3.forward * Time.deltaTime * _speed;
+            PlayerAbsoluteMove(Vector3.forward, _speed);
 
-            _state = PlayerState.Moving;
+                _state = PlayerState.Moving;
         }
         if (Input.GetKey(KeyCode.S))
         {
-            transform.rotation = Quaternion.Slerp(transform.rotation,
-                Quaternion.LookRotation(Vector3.back), 0.2f);
+            PlayerAbsoluteRotate(Vector3.back);
             
-            transform.position += Vector3.back * Time.deltaTime * _speed;
+            PlayerAbsoluteMove(Vector3.back, _speed);
 
-            _state = PlayerState.Moving;
+                _state = PlayerState.Moving;
         }
         if (Input.GetKey(KeyCode.A))
         {
-            transform.rotation = Quaternion.Slerp(transform.rotation, 
-                Quaternion.LookRotation(Vector3.left), 0.2f);
-            
-            transform.position += Vector3.left * Time.deltaTime * _speed;
+            PlayerAbsoluteRotate(Vector3.left);
 
-            _state = PlayerState.Moving;
+            PlayerAbsoluteMove(Vector3.left, _speed);
+
+                _state = PlayerState.Moving;
         }
         if (Input.GetKey(KeyCode.D))
         {
-            transform.rotation = Quaternion.Slerp(transform.rotation, 
-                Quaternion.LookRotation(Vector3.right), 0.2f);
-            
-            transform.position += Vector3.right * Time.deltaTime * _speed;
+            PlayerAbsoluteRotate(Vector3.right);
 
-            _state = PlayerState.Moving;
-        }
-        if (Input.GetKey(KeyCode.Space))
-        {
-            //test
-            if (transform.position.y < 1.5)
-            {
-                transform.position += Vector3.up*Time.deltaTime*12;
+            PlayerAbsoluteMove(Vector3.right, _speed);
 
                 _state = PlayerState.Moving;
-            }
-                
         }
 
-
+        
 
 
         if (Input.GetKeyUp(KeyCode.A)||Input.GetKeyUp(KeyCode.D)
-            ||Input.GetKeyUp(KeyCode.W)||Input.GetKeyUp(KeyCode.S)
-            ||Input.GetKeyUp(KeyCode.Space))
+            ||Input.GetKeyUp(KeyCode.W)||Input.GetKeyUp(KeyCode.S))
         {
-            _state = PlayerState.Idle;
+                _state = PlayerState.Idle;
         }
     }
 
+    void OnKeyBoardJump()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (_at == PlayerAt.OnGround)
+            {
+                _rb.AddForce(Vector3.up * _speed, ForceMode.Impulse);
+                _at = PlayerAt.OnAir;
+            }
+        }
+    }
+
+    void PlayerAbsoluteRotate(Vector3 direct)
+    {
+        transform.rotation = Quaternion.Slerp(transform.rotation,
+               Quaternion.LookRotation(direct), 0.2f);
+    }
+
+    void PlayerAbsoluteMove(Vector3 direct, float speed)
+    {
+        transform.position += direct * Time.deltaTime * speed;
+    }
+
+
+    bool isPlayerOn()
+    {
+        //Debug.DrawRay(transform.position + Vector3.up * 10f, Vector3.down,Color.red);
+
+
+        bool result = Physics.Raycast(transform.position+Vector3.up*0.1f, Vector3.down, 0.2f);
+        
+        return result;
+        
+    }
+
+    bool isPlayerOn(LayerMask layer)
+    {
+        return Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, 0.2f,layer);
+    }
+
+
+    //test
+    string[] _names = Enum.GetNames(typeof(PlayerAt));
     void PrintPlayerState()
     {
-        if (_state == PlayerState.Moving)
-        {
-            Debug.Log("player state moving");
-        }
-        else if (_state == PlayerState.Idle)
-        {
-            Debug.Log("player state idle");
-        }
-        return;
+        Debug.Log($"player at {_names[(int)_at]}");
     }
 }
