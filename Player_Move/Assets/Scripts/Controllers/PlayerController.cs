@@ -76,6 +76,8 @@ public class PlayerController : MonoBehaviour
         }
         */
 
+
+
         PrintPlayerState();
     }
 
@@ -150,7 +152,10 @@ public class PlayerController : MonoBehaviour
             if (_at == PlayerAt.OnGround)
             {
                 _rb.AddForce(Vector3.up * _speed, ForceMode.Impulse);
-                _at = PlayerAt.OnAir;
+                
+
+                if(!isPlayerOn())
+                    _at = PlayerAt.OnAir;
             }
         }
     }
