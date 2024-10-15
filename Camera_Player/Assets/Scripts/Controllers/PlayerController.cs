@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static UnityEditor.Experimental.GraphView.GraphView;
@@ -77,7 +78,7 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        PrintPlayerState();
+        //PrintPlayerState();
     }
 
 
@@ -92,67 +93,135 @@ public class PlayerController : MonoBehaviour
 
 
     //test
-
+    bool isEntered = false;
+    float prevX;
     //맵 시작과 끝 트리거
     private void OnTriggerEnter(Collider other)
     {
-        //현재는 이름으로 나중엔 태그로?
-        //원래는 전 맵(장소)의 EndTrigger에서 받아야함.
-
-
-        if (other.gameObject.name == "StartTrigger0")
-        {
-            //임시 현재 맵 정보 받기
-            
-            _cameraController.StoreMapInfo(h: 8, w: 29,
-                s: -48, e:-48 + 29);
-
-
-        }
-        else if(other.gameObject.name == "EndTrigger0")
-        {
-
-            _cameraController.StoreMapInfo(h: 8, w: 29,
-                e: -13 + 29, s: -13);
-            Debug.Log("store next map info");
-            
-        }
-        else if (other.gameObject.name == "StartTrigger1")
-        {
-
-
-
-
-        }
-        else if (other.gameObject.name == "EndTrigger1")
-        {
-
-            _cameraController.StoreMapInfo(h: 8, w: 29,
-                s: 22, e: 22 + 29);
-            Debug.Log("store next map info");
-
-        }
-        else if (other.gameObject.name == "StartTrigger2")
-        //원래는 전 맵(장소)의 EndTrigger에서 받아야함.
-        {
-
-
-
-
-        }
-        else if (other.gameObject.name == "EndTrigger2")
-        {
-
-
-            Debug.Log("test end");
-
-        }
+        prevX=transform.position.x;
     }
 
     private void OnTriggerExit(Collider other)
     {
+        //완전히 지나갔는지
+        //잠시 건들고 되돌아갔는지
+        //구분
+        float nowX = transform.position.x;
+        float resultX=prevX-nowX;
+        float standard = other.GetComponent<BoxCollider>().size.x;
 
-        _cameraController._cameraMode = Define.CameraMode.VerticalHumanView;
+        Debug.Log($"prevX - nowX {resultX}, wid {standard}");
+
+        //_cameraController._cameraMode = Define.CameraMode.VerticalHumanView;
+
+        //현재는 이름으로 나중엔 태그로?
+        //원래는 전 맵(장소)의 EndTrigger에서 받아야함.
+
+        if (resultX>1.0f||resultX<-1.0f)
+        { 
+            if (other.gameObject.name == "StartTrigger0")
+            {
+                //임시 현재 맵 정보 받기
+
+                _cameraController.StoreMapInfo(h: 8, w: 29,
+                    s: -48, e: -48 + 29);
+
+                Debug.Log("store next map0 info");
+
+                isEntered = true;
+
+            }
+            else if (other.gameObject.name == "EndTrigger0")
+            {
+                if (isEntered)
+                {
+                    _cameraController.StoreMapInfo(h: 8, w: 29,
+                        e: -13 + 29, s: -13);
+                    Debug.Log("store next map1 info");
+                    isEntered = false;
+
+                }
+                else
+                {
+                    _cameraController.StoreMapInfo(h: 8, w: 29,
+                    s: -48, e: -48 + 29);
+                    Debug.Log("store next map0 info");
+                    isEntered = true;
+                }
+
+            }
+            else if (other.gameObject.name == "StartTrigger1")
+            {
+                if (isEntered)
+                {
+                    _cameraController.StoreMapInfo(h: 8, w: 29,
+                        s: -48, e: -48 + 29);
+                    Debug.Log("store next map0 info");
+                    isEntered = false;
+                }
+                else
+                {
+                    _cameraController.StoreMapInfo(h: 8, w: 29,
+                        e: -13 + 29, s: -13);
+                    Debug.Log("store next map1 info");
+                    isEntered = true;
+                }
+
+            }
+            else if (other.gameObject.name == "EndTrigger1")
+            {
+                if (isEntered)
+                {
+                    _cameraController.StoreMapInfo(h: 8, w: 29,
+                        s: 22, e: 22 + 29);
+                    Debug.Log("store next map2 info");
+                    isEntered = false;
+                }
+                else
+                {
+                    _cameraController.StoreMapInfo(h: 8, w: 29,
+                        e: -13 + 29, s: -13);
+                    Debug.Log("store next map1 info");
+                    isEntered = true;
+                }
+            }
+            else if (other.gameObject.name == "StartTrigger2")
+            //원래는 전 맵(장소)의 EndTrigger에서 받아야함.
+            {
+                if (isEntered)
+                {
+                    _cameraController.StoreMapInfo(h: 8, w: 29,
+                        e: -13 + 29, s: -13);
+                    Debug.Log("store next map1 info");
+                    isEntered = false;
+                }
+                else
+                {
+                    _cameraController.StoreMapInfo(h: 8, w: 29,
+                        s: 22, e: 22 + 29);
+                    Debug.Log("store next map2 info");
+                    isEntered = true;
+                }
+
+            }
+            else if (other.gameObject.name == "EndTrigger2")
+            {
+
+                if (isEntered)
+                {
+                    Debug.Log("test end");
+                    isEntered = false;
+                }
+                else
+                {
+                    _cameraController.StoreMapInfo(h: 8, w: 29,
+                        e: -13 + 29, s: -13);
+                    Debug.Log("store next map2 info");
+                    isEntered = true;
+                }
+
+            }
+        }
     }
 
     

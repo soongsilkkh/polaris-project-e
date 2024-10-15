@@ -10,8 +10,10 @@ public class CameraController : MonoBehaviour
     {
         public float Height;
         public float Width;
-        public float StartPositionX;
-        public float EndPositionX;
+        public float StartPosX;
+        public float EndPosX;
+        public float NearStartPosX;
+        public float NearEndPosX;
     }
     MapInfo _mapInfo = null;
 
@@ -61,10 +63,11 @@ public class CameraController : MonoBehaviour
         _cameraMode = mode;
     }
     
-    public void StoreMapInfo(float h,float w, float s,float e)
+    public void StoreMapInfo(float h,float w, float s,float e,float nearRange=0.12f)
     {
-        Debug.Log($"{h},{w},{s},{e}");
-        _mapInfo = new MapInfo() { Height = h , Width=w, StartPositionX=s, EndPositionX = e };
+        //Debug.Log($"{h},{w},{s},{e}");
+        _mapInfo = new MapInfo() { Height = h , Width=w, StartPosX=s, EndPosX = e,
+        NearStartPosX=s+w*nearRange, NearEndPosX=e-w*nearRange };
     }
 
     private void DoVerticalQuaterView()
@@ -91,12 +94,6 @@ public class CameraController : MonoBehaviour
         else
             VerticalHumanMoveAndZoomInOut2();
 
-        /*transform.position = _player.transform.position + Vector3.up * CameraDeltaY
-          + Vector3.back * CameraDeltaZ
-            + Vector3.right * CameraDeltaX;*/
-
-
-
 
         Vector3 temp = _player.transform.position + Vector3.up * 1.75f;
                 
@@ -107,47 +104,48 @@ public class CameraController : MonoBehaviour
 
     private void VerticalHumanMoveAndZoomInOut()
     {
+        float zoomInSpeed = 0.01f;
+        float zoomInY = 0.8f;
+        float zoomInZ = 0.7f;
+
+        float zoomOutSpeed = 0.02f;
+
+        Vector3 newPos = _player.transform.position + Vector3.up * CameraDeltaY
+              + Vector3.back * CameraDeltaZ
+              + Vector3.right * CameraDeltaX;
+
         if (_playerController.StatePlayer == PlayerController.PlayerState.Idle)
         {
-            Vector3 newPos = _player.transform.position + Vector3.up * CameraDeltaY * 0.8f
-              + Vector3.back * CameraDeltaZ * 0.7f
-                + Vector3.right * CameraDeltaX;
+            newPos = newPos - Vector3.up * CameraDeltaY * (1.0f - zoomInY)
+                -Vector3.back*CameraDeltaZ * (1.0f-zoomInZ);
 
-            transform.position = Vector3.Slerp(transform.position, newPos, 0.03f);
+            transform.position = Vector3.Slerp(transform.position, newPos, zoomInSpeed);
         }
         else
         {
-            Vector3 newPos = _player.transform.position + Vector3.up * CameraDeltaY
-              + Vector3.back * CameraDeltaZ
-              + Vector3.right * CameraDeltaX; ;
+            if (_playerController.PlayerHorizonMove==PlayerController.PlayerHorizontalMovement.Right)
+                //Input.GetKey(KeyCode.D))
+            {
+                newPos = newPos - Vector3.right * CameraDeltaX + Vector3.right * 4f;
 
-            if (_playerController.PlayerHorizonMove==
-                PlayerController.PlayerHorizontalMovement.Right)//Input.GetKey(KeyCode.D))
-            {
-                newPos = _player.transform.position + Vector3.up * CameraDeltaY
-              + Vector3.back * CameraDeltaZ
-                + Vector3.right * 4f;
-                transform.position = Vector3.Slerp(transform.position, newPos, 0.01f);
+                transform.position = Vector3.Slerp(transform.position, newPos, zoomOutSpeed);
             }
-            if (_playerController.PlayerHorizonMove ==
-                PlayerController.PlayerHorizontalMovement.Left)//Input.GetKey(KeyCode.A))
+            if (_playerController.PlayerHorizonMove ==PlayerController.PlayerHorizontalMovement.Left)
+                //Input.GetKey(KeyCode.A))
             {
-                newPos = _player.transform.position + Vector3.up * CameraDeltaY
-              + Vector3.back * CameraDeltaZ
-                + Vector3.right * -4f;
-                transform.position = Vector3.Slerp(transform.position, newPos, 0.01f);
+                newPos = newPos - Vector3.right * CameraDeltaX + Vector3.right * -4f;
+
+                transform.position = Vector3.Slerp(transform.position, newPos, zoomOutSpeed);
             }
 
 
             //if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S))
-            if(_playerController.PlayerVertMove ==
-                PlayerController.PlayerVerticalMovement.Forward||
-                _playerController.PlayerVertMove ==
-                PlayerController.PlayerVerticalMovement.Back)
+            if(_playerController.PlayerVertMove ==PlayerController.PlayerVerticalMovement.Forward||
+                _playerController.PlayerVertMove ==PlayerController.PlayerVerticalMovement.Back)
             {
-                if (_playerController.PlayerHorizonMove ==
-                PlayerController.PlayerHorizontalMovement.Idle)//!(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
-                    transform.position = Vector3.Slerp(transform.position, newPos, 0.02f);
+                //!(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
+                if (_playerController.PlayerHorizonMove ==PlayerController.PlayerHorizontalMovement.Idle)
+                    transform.position = Vector3.Slerp(transform.position, newPos, zoomOutSpeed);
             }
         }
     }
@@ -155,93 +153,92 @@ public class CameraController : MonoBehaviour
 
     private void VerticalHumanMoveAndZoomInOut2()
     {
-        Debug.Log("move zoom in out 2");
+        float zoomInSpeed = 0.009f;
+        float zoomInY = 0.8f;
+        float zoomInZ = 0.7f;
+
+        float zoomOutSpeed = 0.02f;
+
+        float nearEdgeCamSpeed = 0.008f;
+        float bridgeCamSpeed = 0.05f;
+
+        Vector3 newPos = _player.transform.position + Vector3.up * CameraDeltaY
+              + Vector3.back * CameraDeltaZ
+              + Vector3.right * CameraDeltaX;
+
         if (_playerController.StatePlayer == PlayerController.PlayerState.Idle)
         {
-            Vector3 newPos = _player.transform.position + Vector3.up * CameraDeltaY * 0.8f
-              + Vector3.back * CameraDeltaZ * 0.7f
-                + Vector3.right * CameraDeltaX;
+            newPos=newPos-Vector3.up*CameraDeltaY*(1.0f-zoomInY)-Vector3.back*CameraDeltaZ*(1.0f-zoomInZ);
 
-            if(transform.position.x>=_mapInfo.StartPositionX+_mapInfo.Width*0.1f//맵 가운데 쪽
-                && transform.position.x<=_mapInfo.EndPositionX-_mapInfo.Width*0.1f)
-                transform.position = Vector3.Slerp(transform.position, newPos, 0.01f);
-            else if(transform.position.x<= _mapInfo.StartPositionX + _mapInfo.Width * 0.1f&&
-                transform.position.x>=_mapInfo.StartPositionX)//맵 시작지점 부근
-                transform.position = Vector3.Slerp(transform.position, newPos, 0.008f);
-            else if (transform.position.x >= _mapInfo.EndPositionX - _mapInfo.Width * 0.1f &&
-                transform.position.x <= _mapInfo.EndPositionX)//맵 끝지점 부근
-                transform.position = Vector3.Slerp(transform.position, newPos, 0.008f);
+            if(transform.position.x>=_mapInfo.NearStartPosX&& transform.position.x<=_mapInfo.NearEndPosX)
+                //맵 가운데 쪽
+                transform.position = Vector3.Slerp(transform.position, newPos, zoomInSpeed);
+            else if(transform.position.x<= _mapInfo.NearStartPosX &&transform.position.x>=_mapInfo.StartPosX)
+                //맵 시작지점 부근
+                transform.position = Vector3.Slerp(transform.position, newPos, nearEdgeCamSpeed);
+            else if (transform.position.x >= _mapInfo.NearEndPosX && transform.position.x <= _mapInfo.EndPosX)
+                //맵 끝지점 부근
+                transform.position = Vector3.Slerp(transform.position, newPos, nearEdgeCamSpeed);
             else//전 맵 끝시작 ~ 다음 맵 시작지점 (다음 맵 부분을 벗어난 부분에서)
-                transform.position = Vector3.Slerp(transform.position, newPos, 0.07f);
+                transform.position = Vector3.Slerp(transform.position, newPos, bridgeCamSpeed);
         }
         else
         {
-            Vector3 newPos = _player.transform.position + Vector3.up * CameraDeltaY
-              + Vector3.back * CameraDeltaZ
-              + Vector3.right * CameraDeltaX; ;
-
-            if (_playerController.PlayerHorizonMove ==
-                PlayerController.PlayerHorizontalMovement.Right)//Input.GetKey(KeyCode.D))
+            if (_playerController.PlayerHorizonMove ==PlayerController.PlayerHorizontalMovement.Right)
+                //Input.GetKey(KeyCode.D))
             {
-                newPos = _player.transform.position + Vector3.up * CameraDeltaY
-              + Vector3.back * CameraDeltaZ
-                + Vector3.right * 4f;
+                newPos = newPos - Vector3.right * CameraDeltaX + Vector3.right * 4f;
 
-                if (transform.position.x >= _mapInfo.StartPositionX + _mapInfo.Width * 0.1f
-                && transform.position.x <= _mapInfo.EndPositionX - _mapInfo.Width * 0.1f)
-                    transform.position = Vector3.Slerp(transform.position, newPos, 0.02f);
-                else if (transform.position.x <= _mapInfo.StartPositionX + _mapInfo.Width * 0.1f &&
-                transform.position.x >= _mapInfo.StartPositionX)
-                    transform.position = Vector3.Slerp(transform.position, newPos, 0.008f);
-                else if (transform.position.x >= _mapInfo.EndPositionX - _mapInfo.Width * 0.1f &&
-                    transform.position.x <= _mapInfo.EndPositionX)
-                    transform.position = Vector3.Slerp(transform.position, newPos, 0.008f);
-                else
-                    transform.position = Vector3.Slerp(transform.position, newPos, 0.07f);
+                if (transform.position.x >= _mapInfo.NearStartPosX && transform.position.x <= _mapInfo.NearEndPosX)
+                    transform.position = Vector3.Slerp(transform.position, newPos, zoomOutSpeed);
+                else if (transform.position.x <= _mapInfo.NearStartPosX && transform.position.x >= _mapInfo.StartPosX)
+                    //맵 시작지점 부근
+                    transform.position = Vector3.Slerp(transform.position, newPos, nearEdgeCamSpeed);
+                else if (transform.position.x >= _mapInfo.NearEndPosX && transform.position.x <= _mapInfo.EndPosX)
+                    //맵 끝지점 부근
+                    transform.position = Vector3.Slerp(transform.position, newPos, nearEdgeCamSpeed);
+                else//전 맵 끝시작 ~ 다음 맵 시작지점 (다음 맵 부분을 벗어난 부분에서)
+                    transform.position = Vector3.Slerp(transform.position, newPos, bridgeCamSpeed);
             }
-            if (_playerController.PlayerHorizonMove ==
-                PlayerController.PlayerHorizontalMovement.Left)//Input.GetKey(KeyCode.A))
+            if (_playerController.PlayerHorizonMove ==PlayerController.PlayerHorizontalMovement.Left)
+                //Input.GetKey(KeyCode.A))
             {
-                newPos = _player.transform.position + Vector3.up * CameraDeltaY
-              + Vector3.back * CameraDeltaZ
-                + Vector3.right * -4f;
+                newPos = newPos - Vector3.right * CameraDeltaX + Vector3.right * -4f;
 
-                if (transform.position.x >= _mapInfo.StartPositionX + _mapInfo.Width * 0.1f
-                && transform.position.x <= _mapInfo.EndPositionX - _mapInfo.Width * 0.1f)
-                    transform.position = Vector3.Slerp(transform.position, newPos, 0.02f);
-                else if (transform.position.x <= _mapInfo.StartPositionX + _mapInfo.Width * 0.1f &&
-                transform.position.x >= _mapInfo.StartPositionX)
-                    transform.position = Vector3.Slerp(transform.position, newPos, 0.008f);
-                else if (transform.position.x >= _mapInfo.EndPositionX - _mapInfo.Width * 0.1f &&
-                    transform.position.x <= _mapInfo.EndPositionX)
-                    transform.position = Vector3.Slerp(transform.position, newPos, 0.008f);
-                else
-                    transform.position = Vector3.Slerp(transform.position, newPos, 0.07f);
+                if (transform.position.x >= _mapInfo.NearStartPosX && transform.position.x <= _mapInfo.NearEndPosX)
+                    transform.position = Vector3.Slerp(transform.position, newPos, zoomOutSpeed);
+                else if (transform.position.x <= _mapInfo.NearStartPosX && transform.position.x >= _mapInfo.StartPosX)
+                    //맵 시작지점 부근
+                    transform.position = Vector3.Slerp(transform.position, newPos, nearEdgeCamSpeed);
+                else if (transform.position.x >= _mapInfo.NearEndPosX && transform.position.x <= _mapInfo.EndPosX)
+                    //맵 끝지점 부근
+                    transform.position = Vector3.Slerp(transform.position, newPos, nearEdgeCamSpeed);
+                else//전 맵 끝시작 ~ 다음 맵 시작지점 (다음 맵 부분을 벗어난 부분에서)
+                    transform.position = Vector3.Slerp(transform.position, newPos, bridgeCamSpeed);
             }
 
 
             //if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S))
-            if (_playerController.PlayerVertMove ==
-                PlayerController.PlayerVerticalMovement.Forward ||
-                _playerController.PlayerVertMove ==
-                PlayerController.PlayerVerticalMovement.Back)
+            if (_playerController.PlayerVertMove ==PlayerController.PlayerVerticalMovement.Forward ||
+                _playerController.PlayerVertMove ==PlayerController.PlayerVerticalMovement.Back)
             {
-                if (_playerController.PlayerHorizonMove ==
-                PlayerController.PlayerHorizontalMovement.Idle)//!(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
+                if (_playerController.PlayerHorizonMove ==PlayerController.PlayerHorizontalMovement.Idle)
+                    //!(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
                 {
-                    if (transform.position.x >= _mapInfo.StartPositionX + _mapInfo.Width * 0.1f
-                && transform.position.x <= _mapInfo.EndPositionX - _mapInfo.Width * 0.1f)
-                        transform.position = Vector3.Slerp(transform.position, newPos, 0.04f);
-                    else if (transform.position.x <= _mapInfo.StartPositionX + _mapInfo.Width * 0.1f &&
-                transform.position.x >= _mapInfo.StartPositionX)
-                        transform.position = Vector3.Slerp(transform.position, newPos, 0.008f);
-                    else if (transform.position.x >= _mapInfo.EndPositionX - _mapInfo.Width * 0.1f &&
-                        transform.position.x <= _mapInfo.EndPositionX)
-                        transform.position = Vector3.Slerp(transform.position, newPos, 0.008f);
-                    else
-                        transform.position = Vector3.Slerp(transform.position, newPos, 0.07f);
+                    if (transform.position.x >= _mapInfo.NearStartPosX && transform.position.x <= _mapInfo.NearEndPosX)
+                        transform.position = Vector3.Slerp(transform.position, newPos, zoomOutSpeed);
+                    else if (transform.position.x <= _mapInfo.NearStartPosX && transform.position.x >= _mapInfo.StartPosX)
+                        //맵 시작지점 부근
+                        transform.position = Vector3.Slerp(transform.position, newPos, nearEdgeCamSpeed);
+                    else if (transform.position.x >= _mapInfo.NearEndPosX && transform.position.x <= _mapInfo.EndPosX)
+                        //맵 끝지점 부근
+                        transform.position = Vector3.Slerp(transform.position, newPos, nearEdgeCamSpeed);
+                    else//전 맵 끝시작 ~ 다음 맵 시작지점 (다음 맵 부분을 벗어난 부분에서)
+                        transform.position = Vector3.Slerp(transform.position, newPos, bridgeCamSpeed);
                 }
             }
         }
     }
+
+
 }
