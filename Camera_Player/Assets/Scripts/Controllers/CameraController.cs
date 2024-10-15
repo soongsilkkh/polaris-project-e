@@ -1,18 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 public class CameraController : MonoBehaviour
 {
-    struct MapInfo
+    class MapInfo
     {
         public float Height;
         public float Width;
         public float StartPositionX;
         public float EndPositionX;
     }
-    MapInfo _mapInfo;
+    MapInfo _mapInfo = null;
 
     [SerializeField]
     public Define.CameraMode _cameraMode=Define.CameraMode.VerticalQuaterView;
@@ -62,11 +63,8 @@ public class CameraController : MonoBehaviour
     
     public void StoreMapInfo(float h,float w, float s,float e)
     {
-        _mapInfo.Height = h;
-        _mapInfo.Width = w;
-        _mapInfo.StartPositionX = s;
-        _mapInfo.EndPositionX = e;
-
+        Debug.Log($"{h},{w},{s},{e}");
+        _mapInfo = new MapInfo() { Height = h , Width=w, StartPositionX=s, EndPositionX = e };
     }
 
     private void DoVerticalQuaterView()
@@ -85,31 +83,37 @@ public class CameraController : MonoBehaviour
     private void DoVerticalHumanView()
     {
         //map height => cam rot x
-        //map width => cam rot partial y
-        //player move direction right/left=> cam rot z plus/minus
+        //map width => cam pos partial y
 
-        //VerticalHumanZoomInOut();
 
-        transform.position = _player.transform.position + Vector3.up * CameraDeltaY
+        if (_mapInfo == null)
+            VerticalHumanMoveAndZoomInOut();
+        else
+            VerticalHumanMoveAndZoomInOut2();
+
+        /*transform.position = _player.transform.position + Vector3.up * CameraDeltaY
           + Vector3.back * CameraDeltaZ
-            + Vector3.right * CameraDeltaX;
+            + Vector3.right * CameraDeltaX;*/
 
 
-        Vector3 temp = _player.transform.position + Vector3.up * 2.0f;
+
+
+        Vector3 temp = _player.transform.position + Vector3.up * 1.75f;
+                
         transform.LookAt(temp);
-        VerticalHumanRotateZ();
+        
 
     }
 
-    private void VerticalHumanZoomInOut()
+    private void VerticalHumanMoveAndZoomInOut()
     {
         if (_playerController.StatePlayer == PlayerController.PlayerState.Idle)
         {
-            Vector3 newPos = _player.transform.position + Vector3.up * CameraDeltaY * 0.85f
-              + Vector3.back * CameraDeltaZ * 0.75f
+            Vector3 newPos = _player.transform.position + Vector3.up * CameraDeltaY * 0.8f
+              + Vector3.back * CameraDeltaZ * 0.7f
                 + Vector3.right * CameraDeltaX;
 
-            transform.position = Vector3.Slerp(transform.position, newPos, 0.01f);
+            transform.position = Vector3.Slerp(transform.position, newPos, 0.03f);
         }
         else
         {
@@ -123,7 +127,7 @@ public class CameraController : MonoBehaviour
                 newPos = _player.transform.position + Vector3.up * CameraDeltaY
               + Vector3.back * CameraDeltaZ
                 + Vector3.right * 4f;
-                transform.position = Vector3.Slerp(transform.position, newPos, 0.02f);
+                transform.position = Vector3.Slerp(transform.position, newPos, 0.01f);
             }
             if (_playerController.PlayerHorizonMove ==
                 PlayerController.PlayerHorizontalMovement.Left)//Input.GetKey(KeyCode.A))
@@ -131,7 +135,7 @@ public class CameraController : MonoBehaviour
                 newPos = _player.transform.position + Vector3.up * CameraDeltaY
               + Vector3.back * CameraDeltaZ
                 + Vector3.right * -4f;
-                transform.position = Vector3.Slerp(transform.position, newPos, 0.02f);
+                transform.position = Vector3.Slerp(transform.position, newPos, 0.01f);
             }
 
 
@@ -143,50 +147,101 @@ public class CameraController : MonoBehaviour
             {
                 if (_playerController.PlayerHorizonMove ==
                 PlayerController.PlayerHorizontalMovement.Idle)//!(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
-                    transform.position = Vector3.Slerp(transform.position, newPos, 0.04f);
+                    transform.position = Vector3.Slerp(transform.position, newPos, 0.02f);
             }
         }
     }
 
-    private void VerticalHumanRotateZ()
+
+    private void VerticalHumanMoveAndZoomInOut2()
     {
-        //player move direction right/left=> cam rot z plus/minus
-        
+        Debug.Log("move zoom in out 2");
         if (_playerController.StatePlayer == PlayerController.PlayerState.Idle)
         {
-            Quaternion newRot =
-                Quaternion.Euler(new Vector3(transform.rotation.x, transform.rotation.y, 0f));
-                //new Quaternion(transform.rotation.x, transform.rotation.y, 0f,transform.rotation.w);
+            Vector3 newPos = _player.transform.position + Vector3.up * CameraDeltaY * 0.8f
+              + Vector3.back * CameraDeltaZ * 0.7f
+                + Vector3.right * CameraDeltaX;
 
-            transform.rotation = Quaternion.Slerp(transform.rotation, newRot, 0.1f);
+            if(transform.position.x>=_mapInfo.StartPositionX+_mapInfo.Width*0.1f//맵 가운데 쪽
+                && transform.position.x<=_mapInfo.EndPositionX-_mapInfo.Width*0.1f)
+                transform.position = Vector3.Slerp(transform.position, newPos, 0.01f);
+            else if(transform.position.x<= _mapInfo.StartPositionX + _mapInfo.Width * 0.1f&&
+                transform.position.x>=_mapInfo.StartPositionX)//맵 시작지점 부근
+                transform.position = Vector3.Slerp(transform.position, newPos, 0.008f);
+            else if (transform.position.x >= _mapInfo.EndPositionX - _mapInfo.Width * 0.1f &&
+                transform.position.x <= _mapInfo.EndPositionX)//맵 끝지점 부근
+                transform.position = Vector3.Slerp(transform.position, newPos, 0.008f);
+            else//전 맵 끝시작 ~ 다음 맵 시작지점 (다음 맵 부분을 벗어난 부분에서)
+                transform.position = Vector3.Slerp(transform.position, newPos, 0.07f);
         }
         else
         {
-            Quaternion newRot =
-                 Quaternion.Euler(new Vector3(transform.rotation.x, transform.rotation.y, 0f));
-            //new Quaternion(transform.rotation.x, transform.rotation.y, 0f, transform.rotation.w);
+            Vector3 newPos = _player.transform.position + Vector3.up * CameraDeltaY
+              + Vector3.back * CameraDeltaZ
+              + Vector3.right * CameraDeltaX; ;
 
-            if (Input.GetKey(KeyCode.D))
+            if (_playerController.PlayerHorizonMove ==
+                PlayerController.PlayerHorizontalMovement.Right)//Input.GetKey(KeyCode.D))
             {
-                newRot =
-                     Quaternion.Euler(new Vector3(transform.rotation.x, transform.rotation.y, -12f));
-                //new Quaternion(transform.rotation.x, transform.rotation.y, -120f, transform.rotation.w);
-                transform.rotation = Quaternion.Slerp(transform.rotation, newRot, 0.2f);
+                newPos = _player.transform.position + Vector3.up * CameraDeltaY
+              + Vector3.back * CameraDeltaZ
+                + Vector3.right * 4f;
+
+                if (transform.position.x >= _mapInfo.StartPositionX + _mapInfo.Width * 0.1f
+                && transform.position.x <= _mapInfo.EndPositionX - _mapInfo.Width * 0.1f)
+                    transform.position = Vector3.Slerp(transform.position, newPos, 0.02f);
+                else if (transform.position.x <= _mapInfo.StartPositionX + _mapInfo.Width * 0.1f &&
+                transform.position.x >= _mapInfo.StartPositionX)
+                    transform.position = Vector3.Slerp(transform.position, newPos, 0.008f);
+                else if (transform.position.x >= _mapInfo.EndPositionX - _mapInfo.Width * 0.1f &&
+                    transform.position.x <= _mapInfo.EndPositionX)
+                    transform.position = Vector3.Slerp(transform.position, newPos, 0.008f);
+                else
+                    transform.position = Vector3.Slerp(transform.position, newPos, 0.07f);
             }
-            if (Input.GetKey(KeyCode.A))
+            if (_playerController.PlayerHorizonMove ==
+                PlayerController.PlayerHorizontalMovement.Left)//Input.GetKey(KeyCode.A))
             {
-                newRot =
-                     Quaternion.Euler(new Vector3(transform.rotation.x, transform.rotation.y, 12f));
-                //new Quaternion(transform.rotation.x, transform.rotation.y, 120f, transform.rotation.w);
-                transform.rotation = Quaternion.Slerp(transform.rotation, newRot, 0.2f);
+                newPos = _player.transform.position + Vector3.up * CameraDeltaY
+              + Vector3.back * CameraDeltaZ
+                + Vector3.right * -4f;
+
+                if (transform.position.x >= _mapInfo.StartPositionX + _mapInfo.Width * 0.1f
+                && transform.position.x <= _mapInfo.EndPositionX - _mapInfo.Width * 0.1f)
+                    transform.position = Vector3.Slerp(transform.position, newPos, 0.02f);
+                else if (transform.position.x <= _mapInfo.StartPositionX + _mapInfo.Width * 0.1f &&
+                transform.position.x >= _mapInfo.StartPositionX)
+                    transform.position = Vector3.Slerp(transform.position, newPos, 0.008f);
+                else if (transform.position.x >= _mapInfo.EndPositionX - _mapInfo.Width * 0.1f &&
+                    transform.position.x <= _mapInfo.EndPositionX)
+                    transform.position = Vector3.Slerp(transform.position, newPos, 0.008f);
+                else
+                    transform.position = Vector3.Slerp(transform.position, newPos, 0.07f);
             }
-            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S))
+
+
+            //if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S))
+            if (_playerController.PlayerVertMove ==
+                PlayerController.PlayerVerticalMovement.Forward ||
+                _playerController.PlayerVertMove ==
+                PlayerController.PlayerVerticalMovement.Back)
             {
-                if (!(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
-                    transform.rotation = Quaternion.Slerp(transform.rotation, newRot, 0.4f);
+                if (_playerController.PlayerHorizonMove ==
+                PlayerController.PlayerHorizontalMovement.Idle)//!(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
+                {
+                    if (transform.position.x >= _mapInfo.StartPositionX + _mapInfo.Width * 0.1f
+                && transform.position.x <= _mapInfo.EndPositionX - _mapInfo.Width * 0.1f)
+                        transform.position = Vector3.Slerp(transform.position, newPos, 0.04f);
+                    else if (transform.position.x <= _mapInfo.StartPositionX + _mapInfo.Width * 0.1f &&
+                transform.position.x >= _mapInfo.StartPositionX)
+                        transform.position = Vector3.Slerp(transform.position, newPos, 0.008f);
+                    else if (transform.position.x >= _mapInfo.EndPositionX - _mapInfo.Width * 0.1f &&
+                        transform.position.x <= _mapInfo.EndPositionX)
+                        transform.position = Vector3.Slerp(transform.position, newPos, 0.008f);
+                    else
+                        transform.position = Vector3.Slerp(transform.position, newPos, 0.07f);
+                }
             }
         }
-
-
     }
 }

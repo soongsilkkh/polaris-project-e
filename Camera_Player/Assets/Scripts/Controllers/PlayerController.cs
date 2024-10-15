@@ -86,7 +86,8 @@ public class PlayerController : MonoBehaviour
     {
         //마지막 플레이어 위치 _at이 OnAir일때
         if(_at==PlayerAt.OnAir&&isPlayerOn())
-        _at = PlayerAt.OnGround;
+            _at = PlayerAt.OnGround;
+
     }
 
 
@@ -95,22 +96,56 @@ public class PlayerController : MonoBehaviour
     //맵 시작과 끝 트리거
     private void OnTriggerEnter(Collider other)
     {
-        //현재는 이름으로 나중엔 태그로
-        if (other.gameObject.name == "StartTrigger")
-            //원래는 전 맵(장소)의 EndTrigger에서 받아야함.
+        //현재는 이름으로 나중엔 태그로?
+        //원래는 전 맵(장소)의 EndTrigger에서 받아야함.
+
+
+        if (other.gameObject.name == "StartTrigger0")
+        {
+            //임시 현재 맵 정보 받기
+            
+            _cameraController.StoreMapInfo(h: 8, w: 29,
+                s: -48, e:-48 + 29);
+
+
+        }
+        else if(other.gameObject.name == "EndTrigger0")
         {
 
-            _cameraController._cameraMode = Define.CameraMode.VerticalQuaterView;
+            _cameraController.StoreMapInfo(h: 8, w: 29,
+                e: -13 + 29, s: -13);
+            Debug.Log("store next map info");
+            
+        }
+        else if (other.gameObject.name == "StartTrigger1")
+        {
 
-            //현재 맵 정보 받기
-            _cameraController.StoreMapInfo(8, 30, other.transform.position.x, transform.position.x + 30);
 
 
 
         }
-        else if(other.gameObject.name == "EndTrigger")
+        else if (other.gameObject.name == "EndTrigger1")
         {
+
+            _cameraController.StoreMapInfo(h: 8, w: 29,
+                s: 22, e: 22 + 29);
             Debug.Log("store next map info");
+
+        }
+        else if (other.gameObject.name == "StartTrigger2")
+        //원래는 전 맵(장소)의 EndTrigger에서 받아야함.
+        {
+
+
+
+
+        }
+        else if (other.gameObject.name == "EndTrigger2")
+        {
+
+
+            Debug.Log("test end");
+
         }
     }
 
@@ -201,7 +236,7 @@ public class PlayerController : MonoBehaviour
             if (_at == PlayerAt.OnGround)
             {
                 _at = PlayerAt.OnAir;
-                _rb.AddForce(Vector3.up * _speed, ForceMode.Impulse);
+                _rb.AddForce(Vector3.up * _speed*1.5f, ForceMode.Impulse);
             }
         }
 
@@ -227,7 +262,6 @@ public class PlayerController : MonoBehaviour
 
     bool isPlayerOn()
     {
-
 
         bool result = Physics.Raycast(transform.position+Vector3.up*0.1f, Vector3.down, 0.2f);
         
