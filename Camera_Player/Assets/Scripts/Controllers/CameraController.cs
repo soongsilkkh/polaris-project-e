@@ -6,6 +6,25 @@ using UnityEngine.UIElements;
 
 public class CameraController : MonoBehaviour
 {
+    [SerializeField]
+    public Define.CameraMode _cameraMode=Define.CameraMode.VerticalQuaterView;
+
+    [SerializeField]
+    float CameraDeltaX = 0f;
+    [SerializeField]
+    float CameraDeltaY = 2.5f;
+    [SerializeField]
+    float CameraDeltaZ = 7.75f;
+
+    [SerializeField]
+    GameObject _player = null;
+    
+    
+    
+    
+    
+    PlayerController _playerController = null;
+
     class MapInfo
     {
         public float Height;
@@ -17,19 +36,7 @@ public class CameraController : MonoBehaviour
     }
     MapInfo _mapInfo = null;
 
-    [SerializeField]
-    public Define.CameraMode _cameraMode=Define.CameraMode.VerticalQuaterView;
 
-    [SerializeField]
-    float CameraDeltaX = 0;
-    [SerializeField]
-    float CameraDeltaY = 3f;
-    [SerializeField]
-    float CameraDeltaZ = 6f;
-
-    [SerializeField]
-    GameObject _player = null;
-    PlayerController _playerController = null;
 
     private void Start()
     {
@@ -52,6 +59,11 @@ public class CameraController : MonoBehaviour
         }
     }
 
+
+
+
+
+
     public void SetCameraDelta(float x,float y, float z)
     {
         CameraDeltaX = x;
@@ -63,12 +75,28 @@ public class CameraController : MonoBehaviour
         _cameraMode = mode;
     }
     
-    public void StoreMapInfo(float h,float w, float s,float e,float nearRange=0.12f)
+    public void StoreMapInfo(float h,float w, float s)
     {
-        //Debug.Log($"{h},{w},{s},{e}");
-        _mapInfo = new MapInfo() { Height = h , Width=w, StartPosX=s, EndPosX = e,
-        NearStartPosX=s+w*nearRange, NearEndPosX=e-w*nearRange };
+        
+        _mapInfo = new MapInfo()
+        {
+            Width = w,
+            Height = h,
+            StartPosX=s,
+            EndPosX=s+w,
+            NearStartPosX=s+3.75f,
+            NearEndPosX=s+w-3.75f
+        };
+        
+        Debug.Log($"{h},{w},{s},{_mapInfo.EndPosX}");
+        //use height
     }
+
+
+
+
+
+
 
     private void DoVerticalQuaterView()
     {
@@ -82,7 +110,6 @@ public class CameraController : MonoBehaviour
         transform.LookAt(temp);
     }
 
-
     private void DoVerticalHumanView()
     {
         //map height => cam rot x
@@ -95,8 +122,8 @@ public class CameraController : MonoBehaviour
             VerticalHumanMoveAndZoomInOut2();
 
 
-        Vector3 temp = _player.transform.position + Vector3.up * 1.75f;
-                
+        Vector3 temp = _player.transform.position + Vector3.up * 2.25f;
+
         transform.LookAt(temp);
         
 
