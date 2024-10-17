@@ -22,7 +22,7 @@ public class TestInven : MonoBehaviour
 
     void OnKeyBoardOpenCloseInven()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.Tab))
         {
             if (isInvenOpen)
             {
