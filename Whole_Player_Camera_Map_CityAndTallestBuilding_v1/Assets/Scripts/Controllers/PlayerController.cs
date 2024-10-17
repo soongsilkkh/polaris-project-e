@@ -12,7 +12,7 @@ public class PlayerController : MonoBehaviour
     {
         Idle,
         Moving,
-
+        Running,
 
 
         Jumping,
@@ -35,13 +35,7 @@ public class PlayerController : MonoBehaviour
         Idle, Left, Right
     }
 
-    public enum PlayerMode
-    {
-        Reality, //현실
-        Virtuality, //현실+가상
-        Puzzle, //미니게임
-
-    }
+    
 
     
 
@@ -56,7 +50,7 @@ public class PlayerController : MonoBehaviour
 
 
     [SerializeField]
-    float _speed = 4.0f;
+    float _speed = 3.0f;
 
 
     Rigidbody _rb = null;
@@ -97,18 +91,31 @@ public class PlayerController : MonoBehaviour
 
     void OnKeyBoardMove()
     {
+
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            _speed = 4.0f;
+        }
+
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            _speed = 3.0f;
+        }
         
         if (Input.GetKey(KeyCode.W))
         {
             if (PlayerVertMove != PlayerVerticalMovement.Back)
             {
                 PlayerVertMove = PlayerVerticalMovement.Forward;
-
                 PlayerAbsoluteRotate(Vector3.forward);
 
-                PlayerAbsoluteMove(Vector3.forward, _speed);
+                if (Input.GetKey(KeyCode.LeftShift))
+                    StatePlayer = PlayerState.Running;
+                else 
+                    StatePlayer = PlayerState.Moving;
 
-                StatePlayer = PlayerState.Moving;
+
+                PlayerAbsoluteMove(Vector3.forward, _speed);
             }
         }
         if (Input.GetKey(KeyCode.S))
@@ -116,12 +123,15 @@ public class PlayerController : MonoBehaviour
             if (PlayerVertMove != PlayerVerticalMovement.Forward)
             {
                 PlayerVertMove = PlayerVerticalMovement.Back;
-
                 PlayerAbsoluteRotate(Vector3.back);
 
-                PlayerAbsoluteMove(Vector3.back, _speed);
+                if (Input.GetKey(KeyCode.LeftShift))
+                    StatePlayer = PlayerState.Running;
+                else
+                    StatePlayer = PlayerState.Moving;
+                
 
-                StatePlayer = PlayerState.Moving;
+                PlayerAbsoluteMove(Vector3.back, _speed);
             }
         }
 
@@ -133,9 +143,13 @@ public class PlayerController : MonoBehaviour
                 PlayerHorizonMove = PlayerHorizontalMovement.Left;
                 PlayerAbsoluteRotate(Vector3.left);
 
-                PlayerAbsoluteMove(Vector3.left, _speed);
+                if (Input.GetKey(KeyCode.LeftShift))
+                    StatePlayer = PlayerState.Running;
+                else
+                    StatePlayer = PlayerState.Moving;
 
-                StatePlayer = PlayerState.Moving;
+
+                PlayerAbsoluteMove(Vector3.left, _speed);
             }
         }
         if (Input.GetKey(KeyCode.D))
@@ -143,12 +157,14 @@ public class PlayerController : MonoBehaviour
             if (PlayerHorizonMove != PlayerHorizontalMovement.Left)
             {
                 PlayerHorizonMove = PlayerHorizontalMovement.Right;
-
                 PlayerAbsoluteRotate(Vector3.right);
 
-                PlayerAbsoluteMove(Vector3.right, _speed);
+                if (Input.GetKey(KeyCode.LeftShift))
+                    StatePlayer = PlayerState.Running;
+                else
+                    StatePlayer = PlayerState.Moving;
 
-                StatePlayer = PlayerState.Moving;
+                PlayerAbsoluteMove(Vector3.right, _speed);
             }
         }
         
@@ -174,7 +190,8 @@ public class PlayerController : MonoBehaviour
                 if (AtPlayer == PlayerAt.OnGround)
                 {
                     AtPlayer = PlayerAt.OnAir;
-                    _rb.AddForce(Vector3.up * 6.0f, ForceMode.Impulse);
+
+                    _rb.AddForce(Vector3.up * _speed*1.5f, ForceMode.Impulse);
                 }
             }
 
@@ -199,6 +216,8 @@ public class PlayerController : MonoBehaviour
     }
 
 
+
+
     bool isPlayerOn()
     {
 
@@ -212,7 +231,6 @@ public class PlayerController : MonoBehaviour
     {
         return Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, 0.2f,layer);
     }
-
 
 
 

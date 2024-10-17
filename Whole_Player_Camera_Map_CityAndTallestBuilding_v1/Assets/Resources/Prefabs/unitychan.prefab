@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &4017797024876481038
+--- !u!1001 &7610481069821053671
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -10,19 +10,19 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 100326, guid: 8f0565f23a2b58541a475bd3c1393052, type: 3}
       propertyPath: m_Name
-      value: unitychan
+      value: unitychan 1
       objectReference: {fileID: 0}
     - target: {fileID: 400326, guid: 8f0565f23a2b58541a475bd3c1393052, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -47.77
+      value: 10.98
       objectReference: {fileID: 0}
     - target: {fileID: 400326, guid: 8f0565f23a2b58541a475bd3c1393052, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.67
+      value: 0.75
       objectReference: {fileID: 0}
     - target: {fileID: 400326, guid: 8f0565f23a2b58541a475bd3c1393052, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -6.05
+      value: 17.9
       objectReference: {fileID: 0}
     - target: {fileID: 400326, guid: 8f0565f23a2b58541a475bd3c1393052, type: 3}
       propertyPath: m_LocalRotation.w
@@ -154,26 +154,29 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 100326, guid: 8f0565f23a2b58541a475bd3c1393052, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 535238082986000970}
+      addedObject: {fileID: 3488962858602030294}
     - targetCorrespondingSourceObject: {fileID: 100326, guid: 8f0565f23a2b58541a475bd3c1393052, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1577493102184211022}
+      addedObject: {fileID: 6227836439710275327}
     - targetCorrespondingSourceObject: {fileID: 100326, guid: 8f0565f23a2b58541a475bd3c1393052, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 4374878167953572685}
+      addedObject: {fileID: 4531333636599051057}
+    - targetCorrespondingSourceObject: {fileID: 100326, guid: 8f0565f23a2b58541a475bd3c1393052, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 239834611768455988}
   m_SourcePrefab: {fileID: 100100000, guid: 8f0565f23a2b58541a475bd3c1393052, type: 3}
---- !u!1 &4017797024876580328 stripped
+--- !u!1 &7610481069821086977 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100326, guid: 8f0565f23a2b58541a475bd3c1393052, type: 3}
-  m_PrefabInstance: {fileID: 4017797024876481038}
+  m_PrefabInstance: {fileID: 7610481069821053671}
   m_PrefabAsset: {fileID: 0}
---- !u!54 &535238082986000970
+--- !u!54 &3488962858602030294
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4017797024876580328}
+  m_GameObject: {fileID: 7610481069821086977}
   serializedVersion: 4
   m_Mass: 1
   m_Drag: 0
@@ -194,31 +197,32 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!114 &1577493102184211022
+--- !u!114 &6227836439710275327
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4017797024876580328}
+  m_GameObject: {fileID: 7610481069821086977}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1a4142ae77dc75643b2596080bc11d05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   StatePlayer: 0
-  _speed: 4
+  AtPlayer: 0
   PlayerVertMove: 0
   PlayerHorizonMove: 0
-  _camera: {fileID: 0}
---- !u!136 &4374878167953572685
+  JumpLock: 0
+  _speed: 3
+--- !u!136 &4531333636599051057
 CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4017797024876580328}
-  m_Material: {fileID: 13400000, guid: a2d50be2fa75ca24b8d46acab13de392, type: 2}
+  m_GameObject: {fileID: 7610481069821086977}
+  m_Material: {fileID: 13400000, guid: 0f4b4331710312242933dad8cf04c53e, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -234,3 +238,16 @@ CapsuleCollider:
   m_Height: 1.5774654
   m_Direction: 1
   m_Center: {x: 0.004345894, y: 0.7419624, z: 0}
+--- !u!114 &239834611768455988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7610481069821086977}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b90dddb2cadfbb4da3005942aeab959, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _camera: {fileID: 0}
