@@ -178,6 +178,7 @@ public class CameraController : MonoBehaviour
     }
 
 
+    //Cameara moves with mapinfo, trigger, 
     private void VerticalHumanMoveAndZoomInOut2()
     {
         float zoomInSpeed = 0.009f;

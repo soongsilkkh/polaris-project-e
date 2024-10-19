@@ -36,7 +36,6 @@ public class PlayerController : MonoBehaviour
     }
 
     
-
     
 
     public PlayerState StatePlayer = PlayerState.Idle;
@@ -67,6 +66,9 @@ public class PlayerController : MonoBehaviour
         Managers.Input.KeyAction += this.OnKeyBoardIdle;
         Managers.Input.KeyAction += this.OnKeyBoardIdle;
 
+        Managers.Input.KeyAction -= this.OnKeyBoardAccelerate;
+        Managers.Input.KeyAction += this.OnKeyBoardAccelerate;
+
         Managers.Input.MoveKeyAction-= this.OnKeyBoardMove;
         Managers.Input.MoveKeyAction+= this.OnKeyBoardMove;
 
@@ -91,16 +93,6 @@ public class PlayerController : MonoBehaviour
 
     void OnKeyBoardMove()
     {
-
-        if (Input.GetKeyDown(KeyCode.LeftShift))
-        {
-            _speed = 4.0f;
-        }
-
-        if (Input.GetKeyUp(KeyCode.LeftShift))
-        {
-            _speed = 3.0f;
-        }
         
         if (Input.GetKey(KeyCode.W))
         {
@@ -191,7 +183,10 @@ public class PlayerController : MonoBehaviour
                 {
                     AtPlayer = PlayerAt.OnAir;
 
-                    _rb.AddForce(Vector3.up * _speed*1.5f, ForceMode.Impulse);
+                    if( StatePlayer==PlayerState.Running )
+                        _rb.AddForce(Vector3.up * 6.0f, ForceMode.Impulse);
+                    else
+                        _rb.AddForce(Vector3.up * 4.5f, ForceMode.Impulse);
                 }
             }
 
@@ -202,6 +197,19 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+    }
+
+    void OnKeyBoardAccelerate()
+    {
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            _speed = 4.0f;
+        }
+
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            _speed = 3.0f;
+        }
     }
 
     void PlayerAbsoluteRotate(Vector3 direct)

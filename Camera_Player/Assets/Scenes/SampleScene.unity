@@ -4845,6 +4845,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 506443265166033564, guid: 9c9c9df3095138047915e7d64d2b9049, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 13400000, guid: a2d50be2fa75ca24b8d46acab13de392, type: 2}
     - target: {fileID: 3218120319652884150, guid: 9c9c9df3095138047915e7d64d2b9049, type: 3}
       propertyPath: m_Name
       value: unitychan
