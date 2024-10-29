@@ -156,6 +156,8 @@ where T : UI_Scene
         //프로퍼티 활용.
         go.transform.SetParent(UI_root.transform);
 
+        playerUI.gameObject.SetActive(false);
+
         return playerUI;
     }
 

@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class UI_Inven : UI_Player
 {
     int _subItemCount = 4;
+
+    public GameObject gridPanel=null;
 
     enum GameObjects
     {
@@ -14,6 +17,7 @@ public class UI_Inven : UI_Player
     private void Start()
     {
         Init();
+        
     }
 
     public override void Init()
@@ -22,7 +26,7 @@ public class UI_Inven : UI_Player
 
         Bind<GameObject>(typeof(GameObjects));
 
-        GameObject gridPanel = Get<GameObject>((int)GameObjects.GridPanel);
+        gridPanel = Get<GameObject>((int)GameObjects.GridPanel);
 
 
         foreach (Transform child in gridPanel.transform)
