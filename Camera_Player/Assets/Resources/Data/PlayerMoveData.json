@@ -1,0 +1,12 @@
+{
+  "playermoves": [
+    {
+      "id": "0",
+      "speed": "3.0",
+      "accelspeed": "4.0",
+      "jump": "4.5",
+      "acceljump": "6.0"
+    }
+
+  ]
+}

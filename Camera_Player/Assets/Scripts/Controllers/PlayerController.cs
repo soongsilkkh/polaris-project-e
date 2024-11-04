@@ -36,8 +36,7 @@ public class PlayerController : MonoBehaviour
     }
 
     
-    
-
+   
     public PlayerState StatePlayer = PlayerState.Idle;
     public PlayerAt AtPlayer = PlayerAt.OnGround;
 
@@ -45,7 +44,8 @@ public class PlayerController : MonoBehaviour
     public PlayerHorizontalMovement PlayerHorizonMove = PlayerHorizontalMovement.Idle;
 
     public bool JumpLock = false;
-     
+
+    public bool IsEntered = false;
 
 
     [SerializeField]
@@ -54,7 +54,9 @@ public class PlayerController : MonoBehaviour
 
     Rigidbody _rb = null;
 
+    Dictionary<int, PlayerMove> _playerMoveDataDict = null;
 
+    PlayerMove _playerMove = null;
 
     private void Start()
     {
@@ -72,6 +74,9 @@ public class PlayerController : MonoBehaviour
         Managers.Input.MoveKeyAction-= this.OnKeyBoardMove;
         Managers.Input.MoveKeyAction+= this.OnKeyBoardMove;
 
+        _playerMoveDataDict =  Managers.Data.PlayerMoveDict;
+        
+        _playerMove=_playerMoveDataDict[0];
     }
 
     private void Update()
@@ -184,9 +189,9 @@ public class PlayerController : MonoBehaviour
                     AtPlayer = PlayerAt.OnAir;
 
                     if( StatePlayer==PlayerState.Running )
-                        _rb.AddForce(Vector3.up * 6.0f, ForceMode.Impulse);
+                        _rb.AddForce(Vector3.up * _playerMove.acceljump, ForceMode.Impulse);
                     else
-                        _rb.AddForce(Vector3.up * 4.5f, ForceMode.Impulse);
+                        _rb.AddForce(Vector3.up * _playerMove.jump, ForceMode.Impulse);
                 }
             }
 
@@ -203,12 +208,12 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
-            _speed = 4.0f;
+            _speed = _playerMove.accelspeed;
         }
 
         if (Input.GetKeyUp(KeyCode.LeftShift))
         {
-            _speed = 3.0f;
+            _speed = _playerMove.speed;
         }
     }
 

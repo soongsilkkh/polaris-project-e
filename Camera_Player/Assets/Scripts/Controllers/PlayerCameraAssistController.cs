@@ -7,7 +7,7 @@ public class PlayerCameraAssistController : MonoBehaviour
     [SerializeField]
     Camera _camera = null;
 
-    PlayerController _playerController=null;
+    PlayerController _playerController= null;
     CameraController _cameraController = null;
 
 
@@ -28,7 +28,10 @@ public class PlayerCameraAssistController : MonoBehaviour
         _playerController.JumpLock = false;
 
 
-        Debug.Log($"_prevX {_prevX} nowX {nowX} standard {standard} isThrough {isThrough}");
+        //Debug.Log($"_prevX {_prevX} nowX {nowX} standard {standard} isThrough {isThrough}");
+        
+        
+        isThrough= false;//
 
         if (isThrough)
         {
@@ -76,8 +79,15 @@ public class PlayerCameraAssistController : MonoBehaviour
 
     private void Start()
     {
+
+        _camera = GameObject.Find("Main Camera").GetComponent<Camera>();
+
         _playerController = GetComponent<PlayerController>();
+
         _cameraController = _camera.GetComponent<CameraController>();
+
+        
+        
     }
 
 

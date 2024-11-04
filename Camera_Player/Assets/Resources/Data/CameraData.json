@@ -1,0 +1,38 @@
+{
+  "cameras": [
+    {
+      "id": "0",
+      "stoodUp": "2.0",
+      "zoomInSpeed": "-0.0",
+      "zoomInY": "-0.0",
+      "zoomInZ": "-0.0",
+      "zoomOutSpeed": "-0.0",
+      "cameraMove": "-0.0",
+      "nearEdgeCameraSpeed": "-0.0",
+      "bridgeCameraSpeed": "-0.0"
+    },
+    {
+      "id": "1",
+      "stoodUp": "2.25",
+      "zoomInSpeed": "0.01",
+      "zoomInY": "0.8",
+      "zoomInZ": "0.7",
+      "zoomOutSpeed": "0.02",
+      "cameraMove": "4.0",
+      "nearEdgeCameraSpeed": "-0.0",
+      "bridgeCameraSpeed": "-0.0"
+    },
+    {
+      "id": "2",
+      "stoodUp": "2.25",
+      "zoomInSpeed": "0.009",
+      "zoomInY": "0.8",
+      "zoomInZ": "0.7",
+      "zoomOutSpeed": "0.02",
+      "cameraMove": "4.0",
+      "nearEdgeCameraSpeed": "0.008",
+      "bridgeCameraSpeed": "0.05"
+    }
+
+  ]
+}

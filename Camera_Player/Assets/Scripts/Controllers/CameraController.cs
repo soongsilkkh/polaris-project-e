@@ -9,6 +9,7 @@ public class CameraController : MonoBehaviour
     [SerializeField]
     public Define.CameraMode _cameraMode=Define.CameraMode.VerticalQuaterView;
 
+    //no data detach
     [SerializeField]
     float CameraDeltaX = 0f;
     [SerializeField]
@@ -25,6 +26,8 @@ public class CameraController : MonoBehaviour
     
     PlayerController _playerController = null;
 
+    Dictionary<int, CameraInfo> _cameraInfoDict = null;
+
     class MapInfo
     {
         public float Height;
@@ -40,7 +43,24 @@ public class CameraController : MonoBehaviour
 
     private void Start()
     {
-       _playerController = _player.GetComponent<PlayerController>();
+        _playerController = _player.GetComponent<PlayerController>();
+
+        _player = GameObject.Find("unitychan");
+
+        _cameraInfoDict = Managers.Data.CameraDict;
+
+
+
+
+        //basic settings
+        CameraDeltaX = 0f;
+        CameraDeltaY = 2.5f;
+        CameraDeltaZ = 7.75f;
+
+        gameObject.GetComponent<Camera>().fieldOfView = 50;
+        gameObject.GetComponent<Camera>().nearClipPlane = 0.3f;
+        gameObject.GetComponent<Camera>().farClipPlane = 1000f;
+
 
     }
 
@@ -92,11 +112,10 @@ public class CameraController : MonoBehaviour
         //use height
     }
 
-
-
-
-
-
+    public void StoreMapInfo()
+    {
+        _mapInfo = null;
+    }
 
     private void DoVerticalQuaterView()
     {
@@ -105,11 +124,12 @@ public class CameraController : MonoBehaviour
             + Vector3.right * CameraDeltaX;
 
 
-        Vector3 temp = _player.transform.position + Vector3.up * 2.0f;
+        Vector3 temp = _player.transform.position + Vector3.up * _cameraInfoDict[0].stoodUp; 
 
         transform.LookAt(temp);
     }
 
+    //select between humanzoom1 or humanzoom2 by mapinfo exists
     private void DoVerticalHumanView()
     {
         //map height => cam rot x
@@ -117,36 +137,31 @@ public class CameraController : MonoBehaviour
 
 
         if (_mapInfo == null)
-            VerticalHumanMoveAndZoomInOut();
+            VerticalHumanMoveAndZoomInOut1();
         else
             VerticalHumanMoveAndZoomInOut2();
 
 
-        Vector3 temp = _player.transform.position + Vector3.up * 2.25f;
+        Vector3 temp = _player.transform.position + Vector3.up * _cameraInfoDict[1].stoodUp; 
 
         transform.LookAt(temp);
         
 
     }
 
-    private void VerticalHumanMoveAndZoomInOut()
+
+    private void VerticalHumanMoveAndZoomInOut1()
     {
-        float zoomInSpeed = 0.01f;
-        float zoomInY = 0.8f;
-        float zoomInZ = 0.7f;
-
-        float zoomOutSpeed = 0.02f;
-
         Vector3 newPos = _player.transform.position + Vector3.up * CameraDeltaY
               + Vector3.back * CameraDeltaZ
               + Vector3.right * CameraDeltaX;
 
         if (_playerController.StatePlayer == PlayerController.PlayerState.Idle)
         {
-            newPos = newPos - Vector3.up * CameraDeltaY * (1.0f - zoomInY)
-                -Vector3.back*CameraDeltaZ * (1.0f-zoomInZ);
+            newPos = newPos - Vector3.up * CameraDeltaY * (1.0f - _cameraInfoDict[1].zoomInY)
+                -Vector3.back*CameraDeltaZ * (1.0f- _cameraInfoDict[1].zoomInZ);
 
-            transform.position = Vector3.Slerp(transform.position, newPos, zoomInSpeed);
+            transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[1].zoomInSpeed);
         }
         else
         {
@@ -155,14 +170,14 @@ public class CameraController : MonoBehaviour
             {
                 newPos = newPos - Vector3.right * CameraDeltaX + Vector3.right * 4f;
 
-                transform.position = Vector3.Slerp(transform.position, newPos, zoomOutSpeed);
+                transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[1].zoomOutSpeed);
             }
             if (_playerController.PlayerHorizonMove ==PlayerController.PlayerHorizontalMovement.Left)
                 //Input.GetKey(KeyCode.A))
             {
                 newPos = newPos - Vector3.right * CameraDeltaX + Vector3.right * -4f;
 
-                transform.position = Vector3.Slerp(transform.position, newPos, zoomOutSpeed);
+                transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[1].zoomOutSpeed);
             }
 
 
@@ -172,7 +187,7 @@ public class CameraController : MonoBehaviour
             {
                 //!(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
                 if (_playerController.PlayerHorizonMove ==PlayerController.PlayerHorizontalMovement.Idle)
-                    transform.position = Vector3.Slerp(transform.position, newPos, zoomOutSpeed);
+                    transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[1].zoomOutSpeed);
             }
         }
     }
@@ -181,34 +196,25 @@ public class CameraController : MonoBehaviour
     //Cameara moves with mapinfo, trigger, 
     private void VerticalHumanMoveAndZoomInOut2()
     {
-        float zoomInSpeed = 0.009f;
-        float zoomInY = 0.8f;
-        float zoomInZ = 0.7f;
-
-        float zoomOutSpeed = 0.02f;
-
-        float nearEdgeCamSpeed = 0.008f;
-        float bridgeCamSpeed = 0.05f;
-
         Vector3 newPos = _player.transform.position + Vector3.up * CameraDeltaY
               + Vector3.back * CameraDeltaZ
               + Vector3.right * CameraDeltaX;
 
         if (_playerController.StatePlayer == PlayerController.PlayerState.Idle)
         {
-            newPos=newPos-Vector3.up*CameraDeltaY*(1.0f-zoomInY)-Vector3.back*CameraDeltaZ*(1.0f-zoomInZ);
+            newPos=newPos-Vector3.up*CameraDeltaY*(1.0f- _cameraInfoDict[2].zoomInY) -Vector3.back*CameraDeltaZ*(1.0f- _cameraInfoDict[2].zoomInZ);
 
             if(transform.position.x>=_mapInfo.NearStartPosX&& transform.position.x<=_mapInfo.NearEndPosX)
                 //맵 가운데 쪽
-                transform.position = Vector3.Slerp(transform.position, newPos, zoomInSpeed);
+                transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[2].zoomInSpeed);
             else if(transform.position.x<= _mapInfo.NearStartPosX &&transform.position.x>=_mapInfo.StartPosX)
                 //맵 시작지점 부근
-                transform.position = Vector3.Slerp(transform.position, newPos, nearEdgeCamSpeed);
+                transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[2].nearEdgeCameraSpeed);
             else if (transform.position.x >= _mapInfo.NearEndPosX && transform.position.x <= _mapInfo.EndPosX)
                 //맵 끝지점 부근
-                transform.position = Vector3.Slerp(transform.position, newPos, nearEdgeCamSpeed);
+                transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[2].nearEdgeCameraSpeed);
             else//전 맵 끝시작 ~ 다음 맵 시작지점 (다음 맵 부분을 벗어난 부분에서)
-                transform.position = Vector3.Slerp(transform.position, newPos, bridgeCamSpeed);
+                transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[2].bridgeCameraSpeed);
         }
         else
         {
@@ -218,15 +224,15 @@ public class CameraController : MonoBehaviour
                 newPos = newPos - Vector3.right * CameraDeltaX + Vector3.right * 4f;
 
                 if (transform.position.x >= _mapInfo.NearStartPosX && transform.position.x <= _mapInfo.NearEndPosX)
-                    transform.position = Vector3.Slerp(transform.position, newPos, zoomOutSpeed);
+                    transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[2].zoomOutSpeed);
                 else if (transform.position.x <= _mapInfo.NearStartPosX && transform.position.x >= _mapInfo.StartPosX)
                     //맵 시작지점 부근
-                    transform.position = Vector3.Slerp(transform.position, newPos, nearEdgeCamSpeed);
+                    transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[2].nearEdgeCameraSpeed);
                 else if (transform.position.x >= _mapInfo.NearEndPosX && transform.position.x <= _mapInfo.EndPosX)
                     //맵 끝지점 부근
-                    transform.position = Vector3.Slerp(transform.position, newPos, nearEdgeCamSpeed);
+                    transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[2].nearEdgeCameraSpeed);
                 else//전 맵 끝시작 ~ 다음 맵 시작지점 (다음 맵 부분을 벗어난 부분에서)
-                    transform.position = Vector3.Slerp(transform.position, newPos, bridgeCamSpeed);
+                    transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[2].bridgeCameraSpeed);
             }
             if (_playerController.PlayerHorizonMove ==PlayerController.PlayerHorizontalMovement.Left)
                 //Input.GetKey(KeyCode.A))
@@ -234,15 +240,15 @@ public class CameraController : MonoBehaviour
                 newPos = newPos - Vector3.right * CameraDeltaX + Vector3.right * -4f;
 
                 if (transform.position.x >= _mapInfo.NearStartPosX && transform.position.x <= _mapInfo.NearEndPosX)
-                    transform.position = Vector3.Slerp(transform.position, newPos, zoomOutSpeed);
+                    transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[2].zoomOutSpeed);
                 else if (transform.position.x <= _mapInfo.NearStartPosX && transform.position.x >= _mapInfo.StartPosX)
                     //맵 시작지점 부근
-                    transform.position = Vector3.Slerp(transform.position, newPos, nearEdgeCamSpeed);
+                    transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[2].nearEdgeCameraSpeed);
                 else if (transform.position.x >= _mapInfo.NearEndPosX && transform.position.x <= _mapInfo.EndPosX)
                     //맵 끝지점 부근
-                    transform.position = Vector3.Slerp(transform.position, newPos, nearEdgeCamSpeed);
+                    transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[2].nearEdgeCameraSpeed);
                 else//전 맵 끝시작 ~ 다음 맵 시작지점 (다음 맵 부분을 벗어난 부분에서)
-                    transform.position = Vector3.Slerp(transform.position, newPos, bridgeCamSpeed);
+                    transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[2].bridgeCameraSpeed);
             }
 
 
@@ -254,15 +260,15 @@ public class CameraController : MonoBehaviour
                     //!(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
                 {
                     if (transform.position.x >= _mapInfo.NearStartPosX && transform.position.x <= _mapInfo.NearEndPosX)
-                        transform.position = Vector3.Slerp(transform.position, newPos, zoomOutSpeed);
+                        transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[2].zoomOutSpeed);
                     else if (transform.position.x <= _mapInfo.NearStartPosX && transform.position.x >= _mapInfo.StartPosX)
                         //맵 시작지점 부근
-                        transform.position = Vector3.Slerp(transform.position, newPos, nearEdgeCamSpeed);
+                        transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[2].nearEdgeCameraSpeed);
                     else if (transform.position.x >= _mapInfo.NearEndPosX && transform.position.x <= _mapInfo.EndPosX)
                         //맵 끝지점 부근
-                        transform.position = Vector3.Slerp(transform.position, newPos, nearEdgeCamSpeed);
+                        transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[2].nearEdgeCameraSpeed);
                     else//전 맵 끝시작 ~ 다음 맵 시작지점 (다음 맵 부분을 벗어난 부분에서)
-                        transform.position = Vector3.Slerp(transform.position, newPos, bridgeCamSpeed);
+                        transform.position = Vector3.Slerp(transform.position, newPos, _cameraInfoDict[2].bridgeCameraSpeed);
                 }
             }
         }

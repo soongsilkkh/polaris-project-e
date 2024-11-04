@@ -1,26 +1,31 @@
 include Player_Move
 input manager
 managers
+data manager
+pool manager
+resource manager
+scene managerex
+poolable
 
-Art UnityChan => Change box collider to thin capsule collider
-=> Adjust no-friction physics to capsule collide to get smooth during jump collision
+player controller modified
+camera controller modified
+player camera assist controller modified
 
-Scene StartTriggerCube GameObject trigger => for entering new map and store mapinfo
-Scene EndTriggerCube GameObject trigger => for store next mapinfo and entering prev map
-Scene additional maps
+resources data cameradata
+resources data mapdata
+resources data playermovedata
 
-Controller PlayerController => Add PlayerMovements Enum, PlayerMovements variables, Camera variable, CameraController variable for HumanViewCamera Move and later
-=> Add isEntered variable, prevX variable for store proper MapInfo
-=> Add OnTriggerEnter func for record player's prevX position
-=> Add OnTriggerExit func for check player entering new map and store proper MapInfo, use CameraController's StoreMapInfo func
-=> MapInfo Input is hard codeing rn, needs to define map infos properly later
+scripts data data.cameras
+scripts data data.maps
+scripts data data.playermove
 
-Controller CameraController => Add more MapInfo class member
-=> Implement VerticalHumanView, use stored MapInfo with no Z rotation
-=> Add VerticalHumanViewFuncs
+scripts trigger starttrigger
+scripts trigger endtrigger
 
 
-Define Script
+
+no trigger manager anymore
+trigger func activate at map trigger object not player
 
 change gravity edit>project settings>physics>gravity -9.81 to -15
 
@@ -29,5 +34,5 @@ bug : not appear
 
 
 
-24/10/15 2000
-improve PlayerMove, Implement HumanView, Add new trigger and mapinfo rules
+24/11/05 0200
+Add automation mapping, Add data mapping, modified trigger system

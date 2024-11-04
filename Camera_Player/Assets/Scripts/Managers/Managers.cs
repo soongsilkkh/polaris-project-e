@@ -12,6 +12,22 @@ public class Managers : MonoBehaviour
     InputManager _input=new InputManager();
     public static InputManager Input {  get { return Instance._input; } }
 
+
+    ResourceManager _resource = new ResourceManager();
+    public static ResourceManager Resource { get { Init(); return Instance._resource; } }
+
+    SceneManagerEx _scene = new SceneManagerEx();
+    public static SceneManagerEx Scene { get { return Instance._scene; } }
+
+    PoolManager _pool = new PoolManager();
+    public static PoolManager Pool { get { return Instance._pool; } }
+
+    DataManager _data = new DataManager();
+    public static DataManager Data { get { return Instance._data; } }
+
+
+
+
     private void Start()
     {
         Init();
@@ -45,6 +61,19 @@ public class Managers : MonoBehaviour
 
             DontDestroyOnLoad(go);
             s_instance=go.GetComponent<Managers>();
+
+            s_instance._pool.Init();
+
+            s_instance._data.Init();
         }
+    }
+
+    public static void Clear()
+    {
+        Resource.Clear();
+
+        Scene.Clear();
+
+        Input.Clear();
     }
 }

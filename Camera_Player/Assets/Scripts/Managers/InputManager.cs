@@ -20,4 +20,11 @@ public class InputManager
         if(MoveKeyAction != null) 
             MoveKeyAction.Invoke();
     }
+
+    public void Clear()
+    {
+        KeyAction = null;
+        MoveKeyAction = null;
+
+    }
 }
