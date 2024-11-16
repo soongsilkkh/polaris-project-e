@@ -2,21 +2,24 @@
   "maps": [
     {
       "id": "0",
-      "height": "8",
-      "width": "30",
-      "start": "-48"
+      "depth": "10,0",
+      "height": "8.0",
+      "width": "30.0",
+      "start": "-48.0"
     },
     {
       "id": "1",
-      "height": "8",
-      "width": "30",
-      "start": "-13"
+      "depth": "10,0",
+      "height": "8.0",
+      "width": "30.0",
+      "start": "-13.0"
     },
     {
       "id": "2",
-      "height": "8",
-      "width": "30",
-      "start": "22"
+      "depth": "10,0",
+      "height": "8.0",
+      "width": "30.0",
+      "start": "22.0"
     }
   ]
 

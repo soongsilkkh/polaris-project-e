@@ -30,7 +30,6 @@ public class EndTrigger0 : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-
         _prevX = other.gameObject.transform.position.x;
         _playerController.JumpLock = true;
     }
@@ -53,9 +52,18 @@ public class EndTrigger0 : MonoBehaviour
         if (!isThrough)
             return;
 
+
+        StartCoroutine("COReleasePlayerMoveLock", 0.75f);
+
+
+        _cameraController.SetCameraMode(Define.CameraMode.VerticalHumanView);
+        _cameraController.SetCameraDelta(0f, 2.5f, 7.75f);
+
+
         if (_playerController.IsEntered)
         {
-            _cameraController.StoreMapInfo(s: Managers.Data.MapDict[1].start, w: Managers.Data.MapDict[1].width,
+            _cameraController.StoreMapInfo(d: Managers.Data.MapDict[1].depth, s: Managers.Data.MapDict[1].start,
+                w: Managers.Data.MapDict[1].width,
                 h: Managers.Data.MapDict[1].height);
 
             Debug.Log("store next map1 info");
@@ -65,12 +73,23 @@ public class EndTrigger0 : MonoBehaviour
         else
         {
 
-            _cameraController.StoreMapInfo(s: Managers.Data.MapDict[0].start, w: Managers.Data.MapDict[0].width,
+            _cameraController.StoreMapInfo(d: Managers.Data.MapDict[0].depth, s: Managers.Data.MapDict[0].start,
+                w: Managers.Data.MapDict[0].width,
                 h: Managers.Data.MapDict[0].height);
 
             Debug.Log("store prev map0 info");
 
             _playerController.IsEntered = true;
         }
+
+    }
+
+    IEnumerator COReleasePlayerMoveLock(float seconds)
+    {
+        _playerController.MoveLock = true;
+
+        yield return new WaitForSeconds(seconds);
+
+        _playerController.MoveLock = false;
     }
 }

@@ -8,6 +8,21 @@ using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class PlayerController : MonoBehaviour
 {
+    public enum CameraPos
+    {
+        minusZ,
+        plusZ,
+        minusX,
+        plusX,
+    }
+
+
+    KeyCode[] relForward = { KeyCode.W, KeyCode.S, KeyCode.A, KeyCode.D};
+    KeyCode[] relBackward = { KeyCode.S, KeyCode.W, KeyCode.D, KeyCode.A};
+    KeyCode[] relLeft = { KeyCode.A, KeyCode.D, KeyCode.S, KeyCode.W};
+    KeyCode[] relRight = { KeyCode.D, KeyCode.A, KeyCode.W, KeyCode.S};
+
+
     public enum PlayerState
     {
         Idle,
@@ -35,7 +50,8 @@ public class PlayerController : MonoBehaviour
         Idle, Left, Right
     }
 
-    
+
+    public CameraPos PosCamera = CameraPos.minusZ;
    
     public PlayerState StatePlayer = PlayerState.Idle;
     public PlayerAt AtPlayer = PlayerAt.OnGround;
@@ -43,13 +59,14 @@ public class PlayerController : MonoBehaviour
     public PlayerVerticalMovement PlayerVertMove = PlayerVerticalMovement.Idle;
     public PlayerHorizontalMovement PlayerHorizonMove = PlayerHorizontalMovement.Idle;
 
+    public bool MoveLock = false;
     public bool JumpLock = false;
 
     public bool IsEntered = false;
 
 
     [SerializeField]
-    float _speed = 3.0f;
+    float _speed = 2.5f;
 
 
     Rigidbody _rb = null;
@@ -77,6 +94,8 @@ public class PlayerController : MonoBehaviour
         _playerMoveDataDict =  Managers.Data.PlayerMoveDict;
         
         _playerMove=_playerMoveDataDict[0];
+
+        GetComponent<CapsuleCollider>().material = Managers.Resource.Load<PhysicMaterial>("Art/nofriction");
     }
 
     private void Update()
@@ -98,73 +117,74 @@ public class PlayerController : MonoBehaviour
 
     void OnKeyBoardMove()
     {
-        
-        if (Input.GetKey(KeyCode.W))
+        if (!MoveLock) 
         {
-            if (PlayerVertMove != PlayerVerticalMovement.Back)
+            if (Input.GetKey(relForward[(int)PosCamera]))
             {
-                PlayerVertMove = PlayerVerticalMovement.Forward;
-                PlayerAbsoluteRotate(Vector3.forward);
+                if (PlayerVertMove != PlayerVerticalMovement.Back)
+                {
+                    PlayerVertMove = PlayerVerticalMovement.Forward;
+                    PlayerAbsoluteRotate(Vector3.forward);
 
-                if (Input.GetKey(KeyCode.LeftShift))
-                    StatePlayer = PlayerState.Running;
-                else 
-                    StatePlayer = PlayerState.Moving;
+                    if (Input.GetKey(KeyCode.LeftShift))
+                        StatePlayer = PlayerState.Running;
+                    else
+                        StatePlayer = PlayerState.Moving;
 
 
-                PlayerAbsoluteMove(Vector3.forward, _speed);
+                    PlayerAbsoluteMove(Vector3.forward, _speed);
+                }
             }
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            if (PlayerVertMove != PlayerVerticalMovement.Forward)
+            if (Input.GetKey(relBackward[(int)PosCamera]))
             {
-                PlayerVertMove = PlayerVerticalMovement.Back;
-                PlayerAbsoluteRotate(Vector3.back);
+                if (PlayerVertMove != PlayerVerticalMovement.Forward)
+                {
+                    PlayerVertMove = PlayerVerticalMovement.Back;
+                    PlayerAbsoluteRotate(Vector3.back);
 
-                if (Input.GetKey(KeyCode.LeftShift))
-                    StatePlayer = PlayerState.Running;
-                else
-                    StatePlayer = PlayerState.Moving;
-                
+                    if (Input.GetKey(KeyCode.LeftShift))
+                        StatePlayer = PlayerState.Running;
+                    else
+                        StatePlayer = PlayerState.Moving;
 
-                PlayerAbsoluteMove(Vector3.back, _speed);
+
+                    PlayerAbsoluteMove(Vector3.back, _speed);
+                }
             }
-        }
 
 
-        if (Input.GetKey(KeyCode.A))
-        {
-            if (PlayerHorizonMove != PlayerHorizontalMovement.Right)
+            if (Input.GetKey(relLeft[(int)PosCamera]))
             {
-                PlayerHorizonMove = PlayerHorizontalMovement.Left;
-                PlayerAbsoluteRotate(Vector3.left);
+                if (PlayerHorizonMove != PlayerHorizontalMovement.Right)
+                {
+                    PlayerHorizonMove = PlayerHorizontalMovement.Left;
+                    PlayerAbsoluteRotate(Vector3.left);
 
-                if (Input.GetKey(KeyCode.LeftShift))
-                    StatePlayer = PlayerState.Running;
-                else
-                    StatePlayer = PlayerState.Moving;
+                    if (Input.GetKey(KeyCode.LeftShift))
+                        StatePlayer = PlayerState.Running;
+                    else
+                        StatePlayer = PlayerState.Moving;
 
 
-                PlayerAbsoluteMove(Vector3.left, _speed);
+                    PlayerAbsoluteMove(Vector3.left, _speed);
+                }
             }
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            if (PlayerHorizonMove != PlayerHorizontalMovement.Left)
+            if (Input.GetKey(relRight[(int)PosCamera]))
             {
-                PlayerHorizonMove = PlayerHorizontalMovement.Right;
-                PlayerAbsoluteRotate(Vector3.right);
+                if (PlayerHorizonMove != PlayerHorizontalMovement.Left)
+                {
+                    PlayerHorizonMove = PlayerHorizontalMovement.Right;
+                    PlayerAbsoluteRotate(Vector3.right);
 
-                if (Input.GetKey(KeyCode.LeftShift))
-                    StatePlayer = PlayerState.Running;
-                else
-                    StatePlayer = PlayerState.Moving;
+                    if (Input.GetKey(KeyCode.LeftShift))
+                        StatePlayer = PlayerState.Running;
+                    else
+                        StatePlayer = PlayerState.Moving;
 
-                PlayerAbsoluteMove(Vector3.right, _speed);
+                    PlayerAbsoluteMove(Vector3.right, _speed);
+                }
             }
-        }
-        
+        }        
     }
 
     void OnKeyBoardIdle()
@@ -244,8 +264,6 @@ public class PlayerController : MonoBehaviour
     {
         return Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, 0.2f,layer);
     }
-
-
 
 
 

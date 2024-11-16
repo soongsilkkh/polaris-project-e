@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 public class CameraController : MonoBehaviour
 {
     [SerializeField]
-    public Define.CameraMode _cameraMode=Define.CameraMode.VerticalQuaterView;
+    Define.CameraMode _cameraMode=Define.CameraMode.VerticalQuaterView;
 
     //no data detach
     [SerializeField]
@@ -21,15 +21,13 @@ public class CameraController : MonoBehaviour
     GameObject _player = null;
     
     
-    
-    
-    
     PlayerController _playerController = null;
 
     Dictionary<int, CameraInfo> _cameraInfoDict = null;
 
     class MapInfo
     {
+        public float Depth;
         public float Height;
         public float Width;
         public float StartPosX;
@@ -41,21 +39,71 @@ public class CameraController : MonoBehaviour
 
 
 
+    public void SetCameraDelta(float x, float y, float z)
+    {
+        CameraDeltaX = x;
+        CameraDeltaY = y;
+        CameraDeltaZ = z;
+    }
+    public void SetCameraMode(Define.CameraMode mode)
+    {
+        switch (mode)
+        {
+            case Define.CameraMode.VerticalQuaterView:
+                _playerController.PosCamera = PlayerController.CameraPos.minusZ;
+                break;
+            case Define.CameraMode.VerticalHumanView:
+                _playerController.PosCamera = PlayerController.CameraPos.minusZ;
+                break;
+            case Define.CameraMode.HorizontalHallView:
+                _playerController.PosCamera = PlayerController.CameraPos.minusX;
+                break;
+            default:
+                break;
+        }
+
+
+        _cameraMode = mode;
+    }
+
+    public void StoreMapInfo(float d,float h, float w, float s)
+    {
+
+        _mapInfo = new MapInfo()
+        {
+            Depth=d,
+            Width = w,
+            Height = h,
+            StartPosX = s,
+            EndPosX = s + w,
+            NearStartPosX = s + 3.75f,
+            NearEndPosX = s + w - 3.75f
+        };
+
+        Debug.Log($"{h},{w},{s},{_mapInfo.EndPosX}");
+        //use height
+    }
+    public void StoreMapInfo()
+    {
+        _mapInfo = null;
+    }
+
+
+
+
     private void Start()
     {
-        _playerController = _player.GetComponent<PlayerController>();
-
         _player = GameObject.Find("unitychan");
 
-        _cameraInfoDict = Managers.Data.CameraDict;
+
+        _playerController = _player.GetComponent<PlayerController>();
 
 
+       _cameraInfoDict = Managers.Data.CameraDict;
 
 
         //basic settings
-        CameraDeltaX = 0f;
-        CameraDeltaY = 2.5f;
-        CameraDeltaZ = 7.75f;
+        SetCameraDelta(0, 2.5f, 7.75f);
 
         gameObject.GetComponent<Camera>().fieldOfView = 50;
         gameObject.GetComponent<Camera>().nearClipPlane = 0.3f;
@@ -74,48 +122,15 @@ public class CameraController : MonoBehaviour
             case Define.CameraMode.VerticalHumanView:
                 DoVerticalHumanView();
                 break;
+            case Define.CameraMode.HorizontalHallView:
+                DoHorizontalHallView();
+                break;
             default:
                 break;
         }
     }
 
 
-
-
-
-
-    public void SetCameraDelta(float x,float y, float z)
-    {
-        CameraDeltaX = x;
-        CameraDeltaY = y;
-        CameraDeltaZ = z;
-    }
-    public void SetCameraMode(Define.CameraMode mode)
-    {
-        _cameraMode = mode;
-    }
-    
-    public void StoreMapInfo(float h,float w, float s)
-    {
-        
-        _mapInfo = new MapInfo()
-        {
-            Width = w,
-            Height = h,
-            StartPosX=s,
-            EndPosX=s+w,
-            NearStartPosX=s+3.75f,
-            NearEndPosX=s+w-3.75f
-        };
-        
-        Debug.Log($"{h},{w},{s},{_mapInfo.EndPosX}");
-        //use height
-    }
-
-    public void StoreMapInfo()
-    {
-        _mapInfo = null;
-    }
 
     private void DoVerticalQuaterView()
     {
@@ -135,18 +150,44 @@ public class CameraController : MonoBehaviour
         //map height => cam rot x
         //map width => cam pos partial y
 
+        Vector3 temp = _player.transform.position + Vector3.up * 2.0f;
 
         if (_mapInfo == null)
+        {
             VerticalHumanMoveAndZoomInOut1();
+            temp = _player.transform.position + Vector3.up * _cameraInfoDict[1].stoodUp;
+        }
         else
+        {
             VerticalHumanMoveAndZoomInOut2();
+            temp = _player.transform.position + Vector3.up * _cameraInfoDict[2].stoodUp;
+        }
 
-
-        Vector3 temp = _player.transform.position + Vector3.up * _cameraInfoDict[1].stoodUp; 
-
-        transform.LookAt(temp);
         
+        transform.LookAt(temp);
+    }
 
+
+    Vector3 hallViewTarget=Vector3.zero;
+    private void DoHorizontalHallView()
+    {
+        HorizontalHallViewMove();
+
+        if(hallViewTarget== Vector3.zero)
+        {
+            hallViewTarget = _player.transform.position;
+            hallViewTarget = hallViewTarget + Vector3.up * 2.0f;
+        }
+        else
+        {
+            Vector3 temp = _player.transform.position + Vector3.up * 2.0f;
+            hallViewTarget = Vector3.Slerp(hallViewTarget, temp, 0.025f);
+        }
+
+        //Vector3 temp = _player.transform.position+Vector3.up * 2.0f;
+        //transform.LookAt(temp);
+
+        transform.LookAt(hallViewTarget);
     }
 
 
@@ -274,5 +315,34 @@ public class CameraController : MonoBehaviour
         }
     }
 
+
+    private void HorizontalHallViewMove()
+    {
+        Vector3 newPos = Vector3.right * _player.transform.position.x
+            + Vector3.up * _player.transform.position.y
+            + Vector3.back*_mapInfo.Depth/2
+            + Vector3.up * CameraDeltaY+ Vector3.back * CameraDeltaZ+ Vector3.right * CameraDeltaX;
+
+
+        if (_playerController.StatePlayer == PlayerController.PlayerState.Idle) 
+        {
+            transform.position = Vector3.Slerp(transform.position, newPos, 0.035f);
+        }
+        else 
+        {
+            if (_playerController.PlayerHorizonMove == PlayerController.PlayerHorizontalMovement.Left) 
+            {
+                transform.position = Vector3.Slerp(transform.position, newPos, 0.08f);
+            }
+            else
+            {
+                transform.position = Vector3.Slerp(transform.position, newPos, 0.02f);
+            }
+        }
+
+            
+
+
+    }
 
 }

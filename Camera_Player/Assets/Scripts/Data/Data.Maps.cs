@@ -8,9 +8,10 @@ using UnityEngine;
 public class Map
 {
     public int id;
-    public int height;
-    public int width;
-    public int start;
+    public float depth;
+    public float height;
+    public float width;
+    public float start;
 }
 
 [Serializable]

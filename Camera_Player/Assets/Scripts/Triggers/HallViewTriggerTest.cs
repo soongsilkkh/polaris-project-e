@@ -2,8 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
-public class StartTrigger0 : MonoBehaviour
+public class HallViewTriggerTest : MonoBehaviour
 {
     [SerializeField]
     Camera _camera = null;
@@ -31,9 +30,10 @@ public class StartTrigger0 : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+
         //Å×½ºÆ®
         //_cameraController.SetCameraDelta(0f, 5f, 10f);
-        
+
         _prevX = other.gameObject.transform.position.x;
         _playerController.JumpLock = true;
     }
@@ -45,7 +45,7 @@ public class StartTrigger0 : MonoBehaviour
 
         float standard = GetComponent<BoxCollider>().size.x;
         standard = standard > 0 ? standard : -standard;
-        
+
         bool isThrough = (_prevX - nowX >= standard) || (_prevX - nowX <= -standard);
 
 
@@ -56,27 +56,25 @@ public class StartTrigger0 : MonoBehaviour
         if (!isThrough)
             return;
 
-        _cameraController.SetCameraMode(Define.CameraMode.VerticalHumanView);
-        _cameraController.SetCameraDelta(0f, 2.5f, 7.75f);
+        
+        StartCoroutine("COReleasePlayerMoveLock", 0.75f);
 
 
-        if (_playerController.IsEntered)
-        {
-            _cameraController.StoreMapInfo();
+        //_cameraController.SetCameraMode(Define.CameraMode.VerticalQuaterView);
+        _cameraController.SetCameraMode(Define.CameraMode.HorizontalHallView);
+        _cameraController.SetCameraDelta(-3f, 2f, 0f);
 
-            Debug.Log("store none");
+        //_playerController.PosCamera = PlayerController.CameraPos.minusX;
 
-            _playerController.IsEntered = false;
-        }
-        else
-        {
+    }
 
-            _cameraController.StoreMapInfo(d: Managers.Data.MapDict[0].depth,s: Managers.Data.MapDict[0].start, 
-                w: Managers.Data.MapDict[0].width, h: Managers.Data.MapDict[0].height);
 
-            Debug.Log("store next map0 info");
+    IEnumerator COReleasePlayerMoveLock(float seconds)
+    {
+        _playerController.MoveLock = true;
 
-            _playerController.IsEntered = true;
-        }
+        yield return new WaitForSeconds(seconds);
+
+        _playerController.MoveLock = false;
     }
 }

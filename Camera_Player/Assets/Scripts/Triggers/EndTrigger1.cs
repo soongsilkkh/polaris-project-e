@@ -30,7 +30,6 @@ public class EndTrigger1 : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-
         _prevX = other.gameObject.transform.position.x;
         _playerController.JumpLock = true;
     }
@@ -53,9 +52,13 @@ public class EndTrigger1 : MonoBehaviour
         if (!isThrough)
             return;
 
+        _cameraController.SetCameraMode(Define.CameraMode.VerticalHumanView);
+        _cameraController.SetCameraDelta(0f, 2.5f, 7.75f);
+
         if (_playerController.IsEntered)
         {
-            _cameraController.StoreMapInfo(s: Managers.Data.MapDict[2].start, w: Managers.Data.MapDict[2].width,
+            _cameraController.StoreMapInfo(d: Managers.Data.MapDict[2].depth, s: Managers.Data.MapDict[2].start,
+                w: Managers.Data.MapDict[2].width,
                 h: Managers.Data.MapDict[2].height);
 
             Debug.Log("store next map2 info");
@@ -64,7 +67,8 @@ public class EndTrigger1 : MonoBehaviour
         }
         else
         {
-            _cameraController.StoreMapInfo(s: Managers.Data.MapDict[1].start, w: Managers.Data.MapDict[1].width,
+            _cameraController.StoreMapInfo(d: Managers.Data.MapDict[1].depth, s: Managers.Data.MapDict[1].start, 
+                w: Managers.Data.MapDict[1].width,
                 h: Managers.Data.MapDict[1].height);
 
             Debug.Log("store prev map1 info");
