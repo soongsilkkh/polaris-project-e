@@ -12,7 +12,7 @@ public class EndTrigger2 : MonoBehaviour
 
     PlayerController _playerController = null;
     CameraController _cameraController = null;
-
+    TriggerPass _triggerPass = null;
     private void Start()
     {
         _player = GameObject.Find("unitychan");
@@ -25,35 +25,31 @@ public class EndTrigger2 : MonoBehaviour
 
     }
 
-    //bool _isEntered = false;//플레이어로 ㄱㄱ
-    float _prevX;
-
     private void OnTriggerEnter(Collider other)
     {
-        _prevX = other.gameObject.transform.position.x;
+        _triggerPass = new TriggerPass(GetComponent<BoxCollider>().size.x);
+        _triggerPass.Begin(other.gameObject.transform.position.x);
+
         _playerController.JumpLock = true;
     }
 
     private void OnTriggerExit(Collider other)
     {
-        float nowX = other.gameObject.transform.position.x;
-
-
-        float standard = GetComponent<BoxCollider>().size.x;
-        standard = standard > 0 ? standard : -standard;
-
-        bool isThrough = (_prevX - nowX >= standard) || (_prevX - nowX <= -standard);
-
-        _cameraController.SetCameraMode(Define.CameraMode.VerticalHumanView);
-        _cameraController.SetCameraDelta(0f, 2.5f, 7.75f);
+        _triggerPass.End(other.gameObject.transform.position.x);
 
 
         _playerController.JumpLock = false;
 
-        Debug.Log($"_prevX {_prevX} nowX {nowX} standard {standard} isThrough {isThrough}");
 
-        if (!isThrough)
+
+        if (!_triggerPass.IsPass())
             return;
+
+        _triggerPass = null;
+
+
+        _cameraController.SetCameraMode(Define.CameraMode.VerticalHumanView);
+        _cameraController.SetCameraDelta(0f, 2.5f, 7.75f);
 
         if (_playerController.IsEntered)
         {

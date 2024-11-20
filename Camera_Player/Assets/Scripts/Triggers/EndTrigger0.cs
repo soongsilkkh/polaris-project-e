@@ -13,6 +13,8 @@ public class EndTrigger0 : MonoBehaviour
     PlayerController _playerController = null;
     CameraController _cameraController = null;
 
+    TriggerPass _triggerPass = null;
+
     private void Start()
     {
         _player = GameObject.Find("unitychan");
@@ -25,35 +27,31 @@ public class EndTrigger0 : MonoBehaviour
 
     }
 
-    //bool _isEntered = false;//플레이어로 ㄱㄱ
-    float _prevX;
 
     private void OnTriggerEnter(Collider other)
     {
-        _prevX = other.gameObject.transform.position.x;
+        _triggerPass = new TriggerPass(GetComponent<BoxCollider>().size.x);
+        _triggerPass.Begin(other.gameObject.transform.position.x);
+
         _playerController.JumpLock = true;
     }
 
     private void OnTriggerExit(Collider other)
     {
-        float nowX = other.gameObject.transform.position.x;
-
-
-        float standard = GetComponent<BoxCollider>().size.x;
-        standard = standard > 0 ? standard : -standard;
-
-        bool isThrough = (_prevX - nowX >= standard) || (_prevX - nowX <= -standard);
+        _triggerPass.End(other.gameObject.transform.position.x);
 
 
         _playerController.JumpLock = false;
 
-        Debug.Log($"_prevX {_prevX} nowX {nowX} standard {standard} isThrough {isThrough}");
 
-        if (!isThrough)
+
+        if (!_triggerPass.IsPass())
             return;
 
+        _triggerPass = null;
 
-        StartCoroutine("COReleasePlayerMoveLock", 0.75f);
+
+
 
 
         _cameraController.SetCameraMode(Define.CameraMode.VerticalHumanView);
@@ -84,12 +82,5 @@ public class EndTrigger0 : MonoBehaviour
 
     }
 
-    IEnumerator COReleasePlayerMoveLock(float seconds)
-    {
-        _playerController.MoveLock = true;
 
-        yield return new WaitForSeconds(seconds);
-
-        _playerController.MoveLock = false;
-    }
 }

@@ -58,3 +58,44 @@ public class Util
     }
 
 }
+
+
+public class TriggerPass
+{
+    private float _prevX;
+    private float _nowX;
+    private float _standard;
+
+    private bool _isBegined;
+    private bool _isEnded;
+
+    public TriggerPass(float standard)
+    {
+        _standard = standard>0?standard:-standard;
+        _prevX = 0;
+        _nowX = 0;
+        _isBegined = false;
+        _isEnded = false;
+    }
+
+    public void Begin(float otherPosX) { _prevX = otherPosX; _isBegined = true; }
+    public void End(float otherPosX) { _nowX = otherPosX; _isEnded = true; }
+
+    public bool IsPass()
+    {
+        if (_isBegined && _isEnded)
+        {
+            bool result = false;
+
+            _isBegined=false;
+            _isEnded=false;
+
+            if(result=(_prevX - _nowX >= _standard) || (_prevX - _nowX <= -_standard))
+                Debug.Log($"_prevX {_prevX} nowX {_nowX} standard {_standard} isThrough");
+
+            return result;
+        }
+        else
+            return false;
+    }
+}
