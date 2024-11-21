@@ -24,6 +24,23 @@ public class UIManager
         }
     }
 
+    public GameObject UI_root_dontdestroy
+    {
+        get
+        {
+            GameObject ui_root_dontdestroy = GameObject.Find("@UI_Root_DontDestroy");
+            if(ui_root_dontdestroy == null)
+            {
+                ui_root_dontdestroy = new GameObject { name = "@UI_Root_DontDestroy" };
+                
+            }
+
+            Object.DontDestroyOnLoad(ui_root_dontdestroy);
+
+            return ui_root_dontdestroy;
+        }
+    }
+
     public void SetCanvas(GameObject go, bool sort = true)
     {
         Canvas canvas = Util.GetOrAddComponent<Canvas>(go);
@@ -43,100 +60,7 @@ public class UIManager
 
     }
 
-    #region later
-    /*
-
-    public T GeneratePopupUI<T>(string name = null)
-   where T : UI_Popup
-    {
-        if (string.IsNullOrEmpty(name))
-            name = typeof(T).Name;//T를 name으로 사용.
-
-        //prefab폴더에 저장되어 있는 애(name)를 객체화시키고
-        GameObject go = Managers.Resource.Instantiate($"UI/Popup/{name}");
-
-
-        T popup = Util.GetOrAddComponent<T>(go);
-
-
-        _popupStack.Push(popup);
-
-
-        //프로퍼티 활용.
-        go.transform.SetParent(UI_root.transform);
-
-        return popup;
-    }
-
-    //이제 팝업을 닫는 작업하는 함수도 만들자
-    public void PopPopupUI()
-    {
-        if (_popupStack.Count == 0)
-            return;
-
-        UI_Popup popup = _popupStack.Pop();
-        //스택에서 추출하고
-        Managers.Resource.Destroy(popup.gameObject);
-        //추출한거 삭제. 씬에서, hierarchy에서
-
-        //UI_Popup과 연관된 스크립트 컴포넌트를 갖고 있는 주인(게임 오브젝트)를 삭제시키는 동작.
-
-        popup = null;//접근 방지 보장
-    }
-
-    //지우려는 팝업 UI 확인까지하는 함수
-    public void PopPopupUI(UI_Popup popup)
-    {
-        if (_popupStack.Count == 0)
-            return;
-
-        if (_popupStack.Peek() != popup) return;
-
-        PopPopupUI();
-
-    }
-
-    //모두 지우는 거
-    public void CloseAllPopupUI()
-    {
-        while (_popupStack.Count > 0) PopPopupUI();
-    }
-
-
-    public T GenerateSceneUI<T>(string name = null)
-where T : UI_Scene
-    {
-        if (string.IsNullOrEmpty(name))
-            name = typeof(T).Name;
-
-        GameObject go = Managers.Resource.Instantiate($"UI/Scene/{name}");
-
-        T sceneUI = Util.GetOrAddComponent<T>(go);
-
-        _sceneUI = sceneUI;//스택말고 그냥 변수에 저장.
-
-        //프로퍼티 활용.
-        go.transform.SetParent(UI_root.transform);
-
-        return sceneUI;
-    }
-
-    public void DestroySceneUI()
-    {
-        if (_sceneUI==null)
-            return;
-
-        
-        Managers.Resource.Destroy(_sceneUI.gameObject);
-        //추출한거 삭제. 씬에서, hierarchy에서
-
-        _sceneUI = null;//접근 방지 보장
-    }
-
-    */
-    #endregion
-
-
+    
     public T GeneratePlayerUI<T>(string name = null)
    where T : UI_Player
     {
@@ -154,7 +78,7 @@ where T : UI_Scene
 
 
         //프로퍼티 활용.
-        go.transform.SetParent(UI_root.transform);
+        go.transform.SetParent(UI_root_dontdestroy.transform);
 
         playerUI.gameObject.SetActive(false);
 
